@@ -3,3 +3,17 @@
 # About
 
 Input management for the NuciXNA wrapper over MonoGame/XNA.
+
+# Installation
+
+[![Get it from NuGet](https://raw.githubusercontent.com/hmlendea/readme-assets/master/badges/stores/nuget.png)](https://nuget.org/packages/NuciXNA.Input)
+
+**.NET CLI**:
+```bash
+dotnet add package NuciXNA.Input
+```
+
+**Package Manager**:
+```powershell
+Install-Package NuciXNA.Input
+```
