@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <RootNamespace>NuciXNA.Input</RootNamespace>
-    <Version>1.4</Version>
+    <Version>1.5.0</Version>
     <Description>Input management for NuciXNA</Description>
     <Authors>Horațiu Mlendea</Authors>
     <Copyright>Copyright 2019 © Horațiu Mlendea</Copyright>
