@@ -7,7 +7,7 @@
     <Description>Input management for NuciXNA</Description>
     <Authors>Horațiu Mlendea</Authors>
     <Copyright>Copyright 2021 © Horațiu Mlendea</Copyright>
-    <RepositoryUrl>https://github.com/hmlendea/nucixna</RepositoryUrl>
+    <RepositoryUrl>https://github.com/hmlendea/nucixna.input</RepositoryUrl>
     <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
     <PackageTags>XNA MonoGame</PackageTags>
   </PropertyGroup>
