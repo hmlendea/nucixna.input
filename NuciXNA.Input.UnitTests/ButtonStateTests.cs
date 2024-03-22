@@ -11,10 +11,10 @@ namespace NuciXNA.UnitTests.Input
         [Test]
         public void IsDown_ValueIsCorrect()
         {
-            Assert.AreEqual(false, ButtonState.Idle.IsDown);
-            Assert.AreEqual(true, ButtonState.Pressed.IsDown);
-            Assert.AreEqual(false, ButtonState.Released.IsDown);
-            Assert.AreEqual(true, ButtonState.HeldDown.IsDown);
+            Assert.That(ButtonState.Idle.IsDown, Is.False);
+            Assert.That(ButtonState.Pressed.IsDown);
+            Assert.That(ButtonState.Released.IsDown, Is.False);
+            Assert.That(ButtonState.HeldDown.IsDown);
         }
 
         [Test]
@@ -22,7 +22,7 @@ namespace NuciXNA.UnitTests.Input
         {
             foreach (ButtonState state in ButtonState.GetValues())
             {
-                Assert.AreEqual(state, ButtonState.FromId(state.Id));
+                Assert.That(ButtonState.FromId(state.Id), Is.EqualTo(state));
             }
         }
 
@@ -37,7 +37,7 @@ namespace NuciXNA.UnitTests.Input
         {
             foreach (ButtonState state in ButtonState.GetValues())
             {
-                Assert.AreEqual(state, ButtonState.FromName(state.Name));
+                Assert.That(ButtonState.FromName(state.Name), Is.EqualTo(state));
             }
         }
 
@@ -52,7 +52,7 @@ namespace NuciXNA.UnitTests.Input
         {
             foreach (ButtonState state in ButtonState.GetValues())
             {
-                Assert.AreEqual(state.Name, state.ToString());
+                Assert.That(state.ToString(), Is.EqualTo(state.Name));
             }
         }
 
@@ -61,7 +61,7 @@ namespace NuciXNA.UnitTests.Input
         {
             foreach (ButtonState state in ButtonState.GetValues())
             {
-                Assert.AreEqual(state.Id.GetHashCode(), state.GetHashCode());
+                Assert.That(state.GetHashCode(), Is.EqualTo(state.Id.GetHashCode()));
             }
         }
 
@@ -70,7 +70,7 @@ namespace NuciXNA.UnitTests.Input
         {
             ButtonState state = ButtonState.Idle;
 
-            Assert.IsTrue(state.Equals(ButtonState.Idle));
+            Assert.That(state.Equals(ButtonState.Idle));
         }
 
         [Test]
@@ -78,7 +78,7 @@ namespace NuciXNA.UnitTests.Input
         {
             ButtonState state = ButtonState.Idle;
 
-            Assert.IsFalse(state.Equals(ButtonState.HeldDown));
+            Assert.That(state.Equals(ButtonState.HeldDown), Is.False);
         }
 
         [Test]
@@ -86,7 +86,7 @@ namespace NuciXNA.UnitTests.Input
         {
             ButtonState state = ButtonState.Idle;
 
-            Assert.IsTrue(state.Equals((object)ButtonState.Idle));
+            Assert.That(state.Equals((object)ButtonState.Idle));
         }
 
         [Test]
@@ -94,7 +94,7 @@ namespace NuciXNA.UnitTests.Input
         {
             ButtonState state = ButtonState.Idle;
 
-            Assert.IsFalse(state.Equals((object)ButtonState.HeldDown));
+            Assert.That(state.Equals((object)ButtonState.HeldDown), Is.False);
         }
 
         [Test]
@@ -102,7 +102,7 @@ namespace NuciXNA.UnitTests.Input
         {
             ButtonState state = ButtonState.Idle;
 
-            Assert.IsFalse(state.Equals(DateTime.Now));
+            Assert.That(state.Equals(DateTime.Now), Is.False);
         }
 
         [Test]
@@ -110,7 +110,7 @@ namespace NuciXNA.UnitTests.Input
         {
             ButtonState state = ButtonState.Idle;
 
-            Assert.IsFalse(state.Equals(null));
+            Assert.That(state.Equals(null), Is.False);
         }
 
         [Test]
@@ -118,31 +118,23 @@ namespace NuciXNA.UnitTests.Input
         {
             ButtonState state = ButtonState.Idle;
 
-            Assert.IsTrue(state == ButtonState.Idle);
+            Assert.That(state == ButtonState.Idle);
         }
 
         [Test]
         public void EqualsOperator_CurrentIsNull_ReturnsFalse()
-        {
-            ButtonState state = ButtonState.Idle;
-
-            Assert.IsFalse(null == ButtonState.Idle);
-        }
+            => Assert.That(null == ButtonState.Idle, Is.False);
 
         [Test]
         public void EqualsOperator_OtherIsNull_ReturnsFalse()
-        {
-            ButtonState state = ButtonState.Idle;
-
-            Assert.IsFalse(state == null);
-        }
+            => Assert.That(ButtonState.Idle == null, Is.False);
 
         [Test]
         public void CastAsInt_ReturnsCorrectValue()
         {
             ButtonState state = ButtonState.Idle;
 
-            Assert.AreEqual(state.Id, (int)state);
+            Assert.That((int)state, Is.EqualTo(state.Id));
         }
 
         [Test]
@@ -150,7 +142,7 @@ namespace NuciXNA.UnitTests.Input
         {
             ButtonState state = ButtonState.Idle;
 
-            Assert.AreEqual(state.Name, (string)state);
+            Assert.That((string)state, Is.EqualTo(state.Name));
         }
 
         [Test]
@@ -158,9 +150,9 @@ namespace NuciXNA.UnitTests.Input
         {
             foreach (ButtonState state in ButtonState.GetValues())
             {
-                ButtonState state2 = state.Id;
-            
-                Assert.AreEqual(state, state2);
+                ButtonState stateById = state.Id;
+
+                Assert.That(stateById, Is.EqualTo(state));
             }
         }
 
@@ -168,7 +160,7 @@ namespace NuciXNA.UnitTests.Input
         public void AssignInteger_AssignedInexistentId_ThrowsArgumentException()
         {
             ButtonState state;
-            
+
             Assert.Throws<ArgumentException>(() => state = 873);
         }
 
@@ -177,9 +169,9 @@ namespace NuciXNA.UnitTests.Input
         {
             foreach (ButtonState state in ButtonState.GetValues())
             {
-                ButtonState state2 = state.Name;
-            
-                Assert.AreEqual(state, state2);
+                ButtonState stateByName = state.Name;
+
+                Assert.That(stateByName, Is.EqualTo(state));
             }
         }
 
