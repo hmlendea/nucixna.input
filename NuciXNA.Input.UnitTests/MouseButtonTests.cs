@@ -2,9 +2,7 @@ using System;
 
 using NUnit.Framework;
 
-using NuciXNA.Input;
-
-namespace NuciXNA.UnitTests.Input
+namespace NuciXNA.Input.UnitTests
 {
     public class MouseButtonTests
     {
@@ -19,9 +17,7 @@ namespace NuciXNA.UnitTests.Input
 
         [Test]
         public void FromId_CalledWithInexistentId_ThrowsArgumentException()
-        {
-            Assert.Throws<ArgumentException>(() => MouseButton.FromId(873));
-        }
+            => Assert.Throws<ArgumentException>(() => MouseButton.FromId(873));
 
         [Test]
         public void FromName_ReturnsCorrectMouseButton()
@@ -34,9 +30,7 @@ namespace NuciXNA.UnitTests.Input
 
         [Test]
         public void FromName_CalledWithInexistentName_ThrowsArgumentException()
-        {
-            Assert.Throws<ArgumentException>(() => MouseButton.FromName("Hori"));
-        }
+            => Assert.Throws<ArgumentException>(() => MouseButton.FromName("Hori"));
 
         [Test]
         public void ToString_ReturnsCorrectValue()
@@ -58,75 +52,41 @@ namespace NuciXNA.UnitTests.Input
 
         [Test]
         public void Equals_CalledWithSameMouseButton_ReturnsTrue()
-        {
-            MouseButton state = MouseButton.Left;
-
-            Assert.That(state.Equals(MouseButton.Left));
-        }
+            => Assert.That(MouseButton.Left.Equals(MouseButton.Left));
 
         [Test]
         public void Equals_CalledWithOtherMouseButton_ReturnsFalse()
-        {
-            MouseButton state = MouseButton.Left;
-
-            Assert.That(state.Equals(MouseButton.Right), Is.False);
-        }
+            => Assert.That(MouseButton.Left.Equals(MouseButton.Right), Is.False);
 
         [Test]
         public void Equals_CalledWithSameMouseButtonAsObject_ReturnsTrue()
-        {
-            MouseButton state = MouseButton.Left;
-
-            Assert.That(state.Equals((object)MouseButton.Left));
-        }
+            => Assert.That(MouseButton.Left.Equals((object)MouseButton.Left));
 
         [Test]
         public void Equals_CalledWithOtherMouseButtonAsObject_ReturnsFalse()
-        {
-            MouseButton state = MouseButton.Left;
-
-            Assert.That(state.Equals((object)MouseButton.Right), Is.False);
-        }
+            => Assert.That(MouseButton.Left.Equals((object)MouseButton.Right), Is.False);
 
         [Test]
         public void Equals_CalledWithOtherType_ReturnsFalse()
-        {
-            MouseButton state = MouseButton.Left;
-
-            Assert.That(state.Equals(DateTime.Now), Is.False);
-        }
+            => Assert.That(MouseButton.Left.Equals(DateTime.Now), Is.False);
 
         [Test]
         public void Equals_CalledWithNull_ReturnsFalse()
-        {
-            MouseButton state = MouseButton.Left;
-
-            Assert.That(state.Equals(null), Is.False);
-        }
+            => Assert.That(MouseButton.Left.Equals(null), Is.False);
 
         [Test]
         public void EqualsOperator_OtherIsSameMouseButton_ReturnsTrue()
-        {
-            MouseButton state = MouseButton.Left;
-
-            Assert.That(state == MouseButton.Left);
-        }
+            => Assert.That(MouseButton.Left == MouseButton.Left);
 
         [Test]
         public void EqualsOperator_CurrentIsNull_ReturnsFalse()
         {
-            MouseButton state = MouseButton.Left;
-
             Assert.That(null == MouseButton.Left, Is.False);
         }
 
         [Test]
         public void EqualsOperator_OtherIsNull_ReturnsFalse()
-        {
-            MouseButton state = MouseButton.Left;
-
-            Assert.That(state == null, Is.False);
-        }
+            => Assert.That(MouseButton.Left == null, Is.False);
 
         [Test]
         public void CastAsInt_ReturnsCorrectValue()
@@ -149,9 +109,7 @@ namespace NuciXNA.UnitTests.Input
         {
             foreach (MouseButton state in MouseButton.GetValues())
             {
-                MouseButton stateById = state.Id;
-
-                Assert.That(stateById, Is.EqualTo(state));
+                Assert.That((MouseButton)state.Id, Is.EqualTo(state));
             }
         }
 
@@ -168,9 +126,7 @@ namespace NuciXNA.UnitTests.Input
         {
             foreach (MouseButton state in MouseButton.GetValues())
             {
-                MouseButton stateByName = state.Name;
-
-                Assert.That(stateByName, Is.EqualTo(state));
+                Assert.That((MouseButton)state.Name, Is.EqualTo(state));
             }
         }
 
