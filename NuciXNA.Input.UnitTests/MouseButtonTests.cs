@@ -109,7 +109,7 @@ namespace NuciXNA.Input.UnitTests
         {
             foreach (MouseButton state in MouseButton.GetValues())
             {
-                Assert.That(state.Id, Is.EqualTo(state));
+                Assert.That((MouseButton)state.Id, Is.EqualTo(state));
             }
         }
 
@@ -126,7 +126,7 @@ namespace NuciXNA.Input.UnitTests
         {
             foreach (MouseButton state in MouseButton.GetValues())
             {
-                Assert.That(state.Name, Is.EqualTo(state));
+                Assert.That((MouseButton)state.Name, Is.EqualTo(state));
             }
         }
 
