@@ -9,7 +9,7 @@ namespace NuciXNA.Input
     /// </summary>
     public sealed class ButtonState : IEquatable<ButtonState>
     {
-        static IDictionary<int, ButtonState> entries =
+        static readonly IDictionary<int, ButtonState> entries =
             new Dictionary<int, ButtonState>
             {
                 { Idle.Id, Idle },
@@ -21,22 +21,22 @@ namespace NuciXNA.Input
         /// <summary>
         /// The mouse button is up.
         /// </summary>
-        public static ButtonState Idle => new ButtonState(0, nameof(Idle), false);
+        public static ButtonState Idle => new(0, nameof(Idle), false);
 
         /// <summary>
         /// The mouse button was just pressed.
         /// </summary>
-        public static ButtonState Pressed => new ButtonState(1, nameof(Pressed), true);
+        public static ButtonState Pressed => new(1, nameof(Pressed), true);
 
         /// <summary>
         /// They mouse button was just released.
         /// </summary>
-        public static ButtonState Released => new ButtonState(2, nameof(Released), false);
+        public static ButtonState Released => new(2, nameof(Released), false);
 
         /// <summary>
         /// The mouse button is down.
         /// </summary>
-        public static ButtonState HeldDown => new ButtonState(3, nameof(HeldDown), true);
+        public static ButtonState HeldDown => new(3, nameof(HeldDown), true);
 
         public int Id { get; }
 
@@ -53,34 +53,23 @@ namespace NuciXNA.Input
 
         public static ButtonState FromId(int id)
         {
-            if (!entries.ContainsKey(id))
+            if (!entries.TryGetValue(id, out ButtonState value))
             {
                 throw new ArgumentException($"A {nameof(ButtonState)} with the identifier \"{id}\" does not exist");
             }
 
-            return entries[id];
+            return value;
         }
 
         public static ButtonState FromName(string name)
-        {
-            ButtonState button = entries.Values.FirstOrDefault(x => x.Name == name);
+            => entries.Values.FirstOrDefault(x => x.Name == name)
+            ?? throw new ArgumentException($"A {nameof(ButtonState)} with the name \"{name}\" does not exist");
 
-            if (button == null)
-            {
-                throw new ArgumentException($"A {nameof(ButtonState)} with the name \"{name}\" does not exist");
-            }
+        public override string ToString() => Name;
 
-            return button;
-        }
+        public override int GetHashCode() => Id.GetHashCode();
 
-        public override string ToString()
-            => Name;
-
-        public override int GetHashCode()
-            => Id.GetHashCode();
-
-        public static IEnumerable<ButtonState> GetValues()
-            => entries.Values.ToList();
+        public static IEnumerable<ButtonState> GetValues() => entries.Values.ToList();
 
         public bool Equals(ButtonState other)
         {
@@ -103,7 +92,7 @@ namespace NuciXNA.Input
             {
                 return false;
             }
-            
+
             return Equals(obj as ButtonState);
         }
 
@@ -117,19 +106,14 @@ namespace NuciXNA.Input
             return me.Equals(other);
         }
 
-        public static bool operator !=(ButtonState me, ButtonState other)
-            => !(me == other);
+        public static bool operator !=(ButtonState me, ButtonState other) => !(me == other);
 
-        public static implicit operator int(ButtonState me)
-            => me.Id;
+        public static implicit operator int(ButtonState me) => me.Id;
 
-        public static implicit operator string(ButtonState me)
-            => me.ToString();
-        
-        public static implicit operator ButtonState(int id)
-            => ButtonState.FromId(id);
+        public static implicit operator string(ButtonState me) => me.ToString();
 
-        public static implicit operator ButtonState(string name)
-            => ButtonState.FromName(name);
+        public static implicit operator ButtonState(int id) => FromId(id);
+
+        public static implicit operator ButtonState(string name) => FromName(name);
     }
 }

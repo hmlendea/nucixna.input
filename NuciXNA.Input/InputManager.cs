@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using XNAButtonState = Microsoft.Xna.Framework.Input.ButtonState;
 
 using NuciXNA.Primitives;
 using NuciXNA.Primitives.Mapping;
+using System.Threading;
 
 namespace NuciXNA.Input
 {
@@ -55,7 +55,7 @@ namespace NuciXNA.Input
         MouseState currentMouseState, previousMouseState;
 
         static volatile InputManager instance;
-        static object syncRoot = new object();
+        static readonly Lock syncRoot = new();
 
         /// <summary>
         /// Gets the instance.
@@ -69,10 +69,7 @@ namespace NuciXNA.Input
                 {
                     lock (syncRoot)
                     {
-                        if (instance == null)
-                        {
-                            instance = new InputManager();
-                        }
+                        instance ??= new InputManager();
                     }
                 }
 
@@ -114,26 +111,18 @@ namespace NuciXNA.Input
         }
 
         public bool IsAnyKeyDown()
-        {
-            IEnumerable<Keys> keys = Enum.GetValues(typeof(Keys)).Cast<Keys>();
-
-            return IsAnyKeyDown(keys);
-        }
+            => IsAnyKeyDown(Enum.GetValues<Keys>().Cast<Keys>());
 
         public bool IsAnyKeyDown(params Keys[] keys)
             => IsAnyKeyDown(keys as IEnumerable<Keys>);
 
         public bool IsAnyKeyDown(IEnumerable<Keys> keys)
-        {
-            return keys.Any(currentKeyState.IsKeyDown);
-        }
+            => keys.Any(currentKeyState.IsKeyDown);
 
         public bool IsMouseButtonDown(params MouseButton[] buttons)
-        {
-            return buttons
+            => buttons
                 .Select(GetMouseButtonState)
                 .All(x => x.IsDown);
-        }
 
         public bool IsAnyMouseButtonDown()
             => IsAnyMouseButtonDown(MouseButton.GetValues());
@@ -142,17 +131,13 @@ namespace NuciXNA.Input
             => IsAnyMouseButtonDown(buttons as IEnumerable<MouseButton>);
 
         public bool IsAnyMouseButtonDown(IEnumerable<MouseButton> buttons)
-        {
-            return buttons
+            => buttons
                 .Select(GetMouseButtonState)
                 .Any(x => x.IsDown);
-        }
 
         void CheckKeyboardKeyStates()
         {
-            Array keys = Enum.GetValues(typeof(Keys));
-
-            foreach (Keys key in keys)
+            foreach (Keys key in Enum.GetValues<Keys>())
             {
                 bool isCurrentlyDown = currentKeyState.IsKeyDown(key);
                 bool wasPreviouslyDown = previousKeyState.IsKeyDown(key);
@@ -183,7 +168,7 @@ namespace NuciXNA.Input
             {
                 ButtonState state = GetMouseButtonState(button);
 
-                MouseButtonEventArgs eventArgs = new MouseButtonEventArgs(
+                MouseButtonEventArgs eventArgs = new(
                     button,
                     state,
                     cursorLocation);
@@ -205,15 +190,14 @@ namespace NuciXNA.Input
 
         void CheckMouseMoved()
         {
-            if (currentMouseState.Position != previousMouseState.Position)
+            if (currentMouseState.Position.Equals(previousMouseState.Position))
             {
-                Point2D currentLocation = currentMouseState.Position.ToPoint2D();
-                Point2D previousLocation = previousMouseState.Position.ToPoint2D();
-
-                MouseEventArgs eventArgs = new MouseEventArgs(currentLocation, previousLocation);
-
-                OnMouseMoved(this, eventArgs);
+                return;
             }
+
+            OnMouseMoved(this, new(
+                currentMouseState.Position.ToPoint2D(),
+                previousMouseState.Position.ToPoint2D()));
         }
 
         ButtonState GetMouseButtonState(MouseButton button)
@@ -276,9 +260,7 @@ namespace NuciXNA.Input
         /// <param name="sender">Sender object.</param>
         /// <param name="e">Event arguments.</param>
         void OnKeyboardKeyPressed(object sender, KeyboardKeyEventArgs e)
-        {
-            KeyboardKeyPressed?.Invoke(sender, e);
-        }
+            => KeyboardKeyPressed?.Invoke(sender, e);
 
         /// <summary>
         /// Fires when a keyboard key was released.
@@ -286,9 +268,7 @@ namespace NuciXNA.Input
         /// <param name="sender">Sender object.</param>
         /// <param name="e">Event arguments.</param>
         void OnKeyboardKeyReleased(object sender, KeyboardKeyEventArgs e)
-        {
-            KeyboardKeyReleased?.Invoke(sender, e);
-        }
+            => KeyboardKeyReleased?.Invoke(sender, e);
 
         /// <summary>
         /// Fires when a keyboard key is down.
@@ -296,9 +276,7 @@ namespace NuciXNA.Input
         /// <param name="sender">Sender object.</param>
         /// <param name="e">Event arguments.</param>
         void OnKeyboardKeyHeldDown(object sender, KeyboardKeyEventArgs e)
-        {
-            KeyboardKeyHeldDown?.Invoke(sender, e);
-        }
+            => KeyboardKeyHeldDown?.Invoke(sender, e);
 
         /// <summary>
         /// Fires when a mouse button was pressed.
@@ -306,9 +284,7 @@ namespace NuciXNA.Input
         /// <param name="sender">Sender object.</param>
         /// <param name="e">Event arguments.</param>
         void OnMouseButtonPressed(object sender, MouseButtonEventArgs e)
-        {
-            MouseButtonPressed?.Invoke(sender, e);
-        }
+            => MouseButtonPressed?.Invoke(sender, e);
 
         /// <summary>
         /// Fires when a mouse button was released.
@@ -316,9 +292,7 @@ namespace NuciXNA.Input
         /// <param name="sender">Sender object.</param>
         /// <param name="e">Event arguments.</param>
         void OnMouseButtonReleased(object sender, MouseButtonEventArgs e)
-        {
-            MouseButtonReleased?.Invoke(sender, e);
-        }
+            => MouseButtonReleased?.Invoke(sender, e);
 
         /// <summary>
         /// Fires when a mouse button is held down.
@@ -326,9 +300,7 @@ namespace NuciXNA.Input
         /// <param name="sender">Sender object.</param>
         /// <param name="e">Event arguments.</param>
         void OnMouseButtonHeldDown(object sender, MouseButtonEventArgs e)
-        {
-            MouseButtonHeldDown?.Invoke(sender, e);
-        }
+            => MouseButtonHeldDown?.Invoke(sender, e);
 
         /// <summary>
         /// Fires when the mouse was moved.
@@ -336,20 +308,14 @@ namespace NuciXNA.Input
         /// <param name="sender">Sender object.</param>
         /// <param name="e">Event arguments.</param>
         void OnMouseMoved(object sender, MouseEventArgs e)
-        {
-            MouseMoved?.Invoke(sender, e);
-        }
+            => MouseMoved?.Invoke(sender, e);
 
         // TODO: Everything below this is required by a workaround to a problem and should be removed as soon as it is properly fixed
 
-        public Point2D MouseLocation => new Point2D(currentMouseState.Position.X, currentMouseState.Position.Y);
+        public Point2D MouseLocation => new(currentMouseState.Position.X, currentMouseState.Position.Y);
         public bool MouseButtonInputHandled { get; set; }
 
         public bool IsLeftMouseButtonClicked()
-        {
-            ButtonState state = GetMouseButtonState(MouseButton.Left);
-
-            return state == ButtonState.Pressed;
-        }
+            => GetMouseButtonState(MouseButton.Left).Equals(ButtonState.Pressed);
     }
 }
