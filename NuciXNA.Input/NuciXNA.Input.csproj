@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
     <RootNamespace>NuciXNA.Input</RootNamespace>
-    <Version>2.0.0</Version>
+    <Version>2.0.1</Version>
     <Description>Input management for NuciXNA</Description>
     <Authors>Horațiu Mlendea</Authors>
     <Copyright>Copyright 2024 © Horațiu Mlendea</Copyright>
