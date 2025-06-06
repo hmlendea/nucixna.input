@@ -117,7 +117,7 @@ namespace NuciXNA.Input
         {
             IEnumerable<Keys> keys = Enum.GetValues(typeof(Keys)).Cast<Keys>();
 
-            return IsAnyKeyDown();
+            return IsAnyKeyDown(keys);
         }
 
         public bool IsAnyKeyDown(params Keys[] keys)
@@ -187,7 +187,7 @@ namespace NuciXNA.Input
                     button,
                     state,
                     cursorLocation);
-                
+
                 if (state == ButtonState.Pressed)
                 {
                     OnMouseButtonPressed(this, eventArgs);
