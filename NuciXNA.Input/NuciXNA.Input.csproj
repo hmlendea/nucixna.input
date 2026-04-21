@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>NuciXNA.Input</RootNamespace>
     <Version>2.0.1</Version>
     <Description>Input management for NuciXNA</Description>
