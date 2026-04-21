@@ -8,6 +8,7 @@ using XNAButtonState = Microsoft.Xna.Framework.Input.ButtonState;
 using NuciXNA.Primitives;
 using NuciXNA.Primitives.Mapping;
 using System.Threading;
+using Microsoft.Xna.Framework;
 
 namespace NuciXNA.Input
 {
@@ -80,13 +81,27 @@ namespace NuciXNA.Input
         /// <summary>
         /// Updates the content.
         /// </summary>
-        public void Update()
+        public void Update(GameWindow window)
         {
             previousKeyState = currentKeyState;
             previousMouseState = currentMouseState;
 
             currentKeyState = Keyboard.GetState();
             currentMouseState = Mouse.GetState();
+
+            if (currentMouseState.Position.X < 0 ||
+                currentMouseState.Position.Y < 0)
+            {
+                currentMouseState = new MouseState(
+                    currentMouseState.X + window.ClientBounds.X,
+                    currentMouseState.Y - window.ClientBounds.Y,
+                    currentMouseState.ScrollWheelValue,
+                    currentMouseState.LeftButton,
+                    currentMouseState.MiddleButton,
+                    currentMouseState.RightButton,
+                    currentMouseState.XButton1,
+                    currentMouseState.XButton2);
+            }
 
             CheckKeyboardKeyStates();
             CheckMouseButtonStates();
