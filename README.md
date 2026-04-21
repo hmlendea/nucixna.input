@@ -2,33 +2,139 @@
 
 # NuciXNA.Input
 
-Input management for the NuciXNA wrapper over MonoGame/XNA.
+Input management for NuciXNA (MonoGame/XNA), with event-driven and polling-based APIs for keyboard and mouse input.
+
+## Features
+
+- Keyboard input events: pressed, released, held-down
+- Mouse input events: button pressed/released/held-down and movement
+- Polling helpers for "all" and "any" key/button checks
+- Frame-based state tracking (`Pressed`, `Released`, `HeldDown`, `Idle`)
+- Lightweight singleton API (`InputManager.Instance`)
 
 ## Installation
 
 [![Get it from NuGet](https://raw.githubusercontent.com/hmlendea/readme-assets/master/badges/stores/nuget.png)](https://nuget.org/packages/NuciXNA.Input)
 
 ### .NET CLI
+
 ```bash
 dotnet add package NuciXNA.Input
 ```
 
 ### Package Manager
+
 ```powershell
 Install-Package NuciXNA.Input
 ```
 
 ## Requirements
 
-- .NET (target framework: `net10.0`)
-- MonoGame
+- .NET: `net10.0`
+- MonoGame DesktopGL (or compatible MonoGame runtime)
+
+## Quick Start
+
+Call `Update` once per frame (typically from your `Game.Update`) and subscribe to events.
+
+```csharp
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
+using NuciXNA.Input;
+
+public class Game1 : Game
+{
+	protected override void Initialize()
+	{
+		InputManager.Instance.KeyboardKeyPressed += OnKeyboardKeyPressed;
+		InputManager.Instance.MouseButtonPressed += OnMouseButtonPressed;
+		InputManager.Instance.MouseMoved += OnMouseMoved;
+
+		base.Initialize();
+	}
+
+	protected override void Update(GameTime gameTime)
+	{
+		InputManager.Instance.Update(Window);
+
+		if (InputManager.Instance.IsKeyDown(Keys.LeftControl, Keys.S))
+		{
+			// Handle Ctrl+S
+		}
+
+		if (InputManager.Instance.IsAnyMouseButtonDown())
+		{
+			// At least one mouse button is currently down
+		}
+
+		base.Update(gameTime);
+	}
+
+	private static void OnKeyboardKeyPressed(object sender, KeyboardKeyEventArgs e)
+	{
+		if (e.Key == Keys.Escape)
+		{
+			// Handle Escape
+		}
+	}
+
+	private static void OnMouseButtonPressed(object sender, MouseButtonEventArgs e)
+	{
+		// e.Button, e.ButtonState, e.Location
+	}
+
+	private static void OnMouseMoved(object sender, MouseEventArgs e)
+	{
+		// e.Location, e.PreviousLocation
+	}
+}
+```
+
+## Event API
+
+`InputManager` exposes the following events:
+
+- `KeyboardKeyPressed`
+- `KeyboardKeyReleased`
+- `KeyboardKeyHeldDown`
+- `MouseButtonPressed`
+- `MouseButtonReleased`
+- `MouseButtonHeldDown`
+- `MouseMoved`
+
+Event args include rich state:
+
+- `KeyboardKeyEventArgs`: `Key`, `KeyState`
+- `MouseButtonEventArgs`: `Button`, `ButtonState`, `Location`
+- `MouseEventArgs`: `Location`, `PreviousLocation`
+
+## Polling API
+
+Common polling methods:
+
+- `IsKeyDown(params Keys[] keys)`
+- `IsAnyKeyDown()`
+- `IsAnyKeyDown(params Keys[] keys)`
+- `IsMouseButtonDown(params MouseButton[] buttons)`
+- `IsAnyMouseButtonDown()`
+- `IsAnyMouseButtonDown(params MouseButton[] buttons)`
+
+Button state model:
+
+- `ButtonState.Idle`
+- `ButtonState.Pressed`
+- `ButtonState.Released`
+- `ButtonState.HeldDown`
+
+Mouse buttons:
+
+- `MouseButton.Left`
+- `MouseButton.Right`
+- `MouseButton.Middle`
+- `MouseButton.Back`
+- `MouseButton.Forward`
 
 ## Development
-
-### Prerequisites
-
-- .NET SDK compatible with the target framework
-- MonoGame
 
 ### Build
 
@@ -45,7 +151,7 @@ dotnet run --project NuciXNA.Input.csproj
 ### Test
 
 ```bash
-dotnet test
+dotnet test NuciXNA.Input.sln
 ```
 
 ## Contributing
@@ -63,4 +169,4 @@ When contributing:
 ## License
 
 Licensed under the GNU General Public License v3.0 or later.
-See [LICENSE](./LICENSE) for details.
+See [LICENSE](LICENSE) for details.
