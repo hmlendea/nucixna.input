@@ -89,12 +89,19 @@ namespace NuciXNA.Input
             currentKeyState = Keyboard.GetState();
             currentMouseState = Mouse.GetState();
 
-            if (currentMouseState.Position.X < 0 ||
-                currentMouseState.Position.Y < 0)
+            int rawX = currentMouseState.X;
+            int rawY = currentMouseState.Y;
+
+            // On Linux/SDL2 with the window on a monitor to the LEFT of the primary,
+            // Mouse.GetState() returns both X and Y in virtual-desktop coordinates
+            // (negative when the left monitor sits at a negative virtual-desktop offset).
+            // ClientBounds holds the client-area origin in the same coordinate space,
+            // so adding it converts to client-relative coords for both axes.
+            if (rawX < 0)
             {
                 currentMouseState = new MouseState(
-                    currentMouseState.X + window.ClientBounds.X,
-                    currentMouseState.Y - window.ClientBounds.Y,
+                    rawX + window.ClientBounds.X,
+                    rawY + window.ClientBounds.Y,
                     currentMouseState.ScrollWheelValue,
                     currentMouseState.LeftButton,
                     currentMouseState.MiddleButton,
