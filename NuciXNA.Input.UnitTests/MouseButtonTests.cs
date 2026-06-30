@@ -137,5 +137,37 @@ namespace NuciXNA.Input.UnitTests
 
             Assert.Throws<ArgumentException>(() => state = "Hori");
         }
+
+        [Test]
+        public void GivenTwoNullMouseButtons_WhenComparedWithEqualsOperator_ThenReturnsTrue()
+            => Assert.That((MouseButton)null == (MouseButton)null);
+
+        [Test]
+        public void GivenSameMouseButton_WhenComparedWithNotEqualsOperator_ThenReturnsFalse()
+            => Assert.That(MouseButton.Left != MouseButton.Left, Is.False);
+
+        [Test]
+        public void GivenDifferentMouseButtons_WhenComparedWithNotEqualsOperator_ThenReturnsTrue()
+            => Assert.That(MouseButton.Left != MouseButton.Right);
+
+        [Test]
+        public void GivenNullAndNonNullMouseButton_WhenComparedWithNotEqualsOperator_ThenReturnsTrue()
+            => Assert.That(null != MouseButton.Left);
+
+        [Test]
+        public void GivenMouseButton_WhenGetValuesIsCalled_ThenReturnsFiveItems()
+            => Assert.That(MouseButton.GetValues(), Has.Exactly(5).Items);
+
+        [Test]
+        public void GivenMouseButton_WhenGetValuesIsCalled_ThenContainsAllButtons()
+        {
+            var values = MouseButton.GetValues();
+
+            Assert.That(values, Contains.Item(MouseButton.Left));
+            Assert.That(values, Contains.Item(MouseButton.Right));
+            Assert.That(values, Contains.Item(MouseButton.Middle));
+            Assert.That(values, Contains.Item(MouseButton.Back));
+            Assert.That(values, Contains.Item(MouseButton.Forward));
+        }
     }
 }
