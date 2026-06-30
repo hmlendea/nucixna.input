@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>NuciXNA.Input</RootNamespace>
-    <Version>2.0.3</Version>
+    <Version>2.0.4</Version>
     <Description>Input management for NuciXNA</Description>
     <Authors>Horațiu Mlendea</Authors>
     <Copyright>Copyright 2026 © Horațiu Mlendea</Copyright>
@@ -14,7 +14,7 @@
 
   <ItemGroup>
     <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.4" />
-    <PackageReference Include="NuciXNA.Primitives" Version="2.1.4" />
+    <PackageReference Include="NuciXNA.Primitives" Version="2.1.5" />
   </ItemGroup>
 
 </Project>
