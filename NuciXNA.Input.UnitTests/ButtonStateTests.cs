@@ -144,5 +144,36 @@ namespace NuciXNA.Input.UnitTests
 
             Assert.Throws<ArgumentException>(() => state = "Hori");
         }
+
+        [Test]
+        public void GivenTwoNullButtonStates_WhenComparedWithEqualsOperator_ThenReturnsTrue()
+            => Assert.That((ButtonState)null == (ButtonState)null);
+
+        [Test]
+        public void GivenSameButtonState_WhenComparedWithNotEqualsOperator_ThenReturnsFalse()
+            => Assert.That(ButtonState.Idle != ButtonState.Idle, Is.False);
+
+        [Test]
+        public void GivenDifferentButtonStates_WhenComparedWithNotEqualsOperator_ThenReturnsTrue()
+            => Assert.That(ButtonState.Idle != ButtonState.HeldDown);
+
+        [Test]
+        public void GivenNullAndNonNullButtonState_WhenComparedWithNotEqualsOperator_ThenReturnsTrue()
+            => Assert.That(null != ButtonState.Idle);
+
+        [Test]
+        public void GivenButtonState_WhenGetValuesIsCalled_ThenReturnsFourItems()
+            => Assert.That(ButtonState.GetValues(), Has.Exactly(4).Items);
+
+        [Test]
+        public void GivenButtonState_WhenGetValuesIsCalled_ThenContainsAllStates()
+        {
+            var values = ButtonState.GetValues();
+
+            Assert.That(values, Contains.Item(ButtonState.Idle));
+            Assert.That(values, Contains.Item(ButtonState.Pressed));
+            Assert.That(values, Contains.Item(ButtonState.Released));
+            Assert.That(values, Contains.Item(ButtonState.HeldDown));
+        }
     }
 }
