@@ -38,6 +38,21 @@ namespace NuciXNA.Input
         public event MouseEventHandler MouseMoved;
 
         /// <summary>
+        /// Occurs when a gamepad button was pressed.
+        /// </summary>
+        public event GamepadButtonEventHandler GamepadButtonPressed;
+
+        /// <summary>
+        /// Occurs when a gamepad button was released.
+        /// </summary>
+        public event GamepadButtonEventHandler GamepadButtonReleased;
+
+        /// <summary>
+        /// Occurs when a gamepad button is down.
+        /// </summary>
+        public event GamepadButtonEventHandler GamepadButtonHeldDown;
+
+        /// <summary>
         /// Occurs when a keyboard key was pressed.
         /// </summary>
         public event KeyboardKeyEventHandler KeyboardKeyPressed;
@@ -52,6 +67,8 @@ namespace NuciXNA.Input
         /// </summary>
         public event KeyboardKeyEventHandler KeyboardKeyHeldDown;
 
+        GamePadState[] currentGamepadStates = new GamePadState[4];
+        GamePadState[] previousGamepadStates = new GamePadState[4];
         KeyboardState currentKeyState, previousKeyState;
         MouseState currentMouseState, previousMouseState;
 
@@ -85,9 +102,16 @@ namespace NuciXNA.Input
         {
             previousKeyState = currentKeyState;
             previousMouseState = currentMouseState;
+            previousGamepadStates = currentGamepadStates;
 
             currentKeyState = Keyboard.GetState();
             currentMouseState = Mouse.GetState();
+            currentGamepadStates = new GamePadState[4];
+
+            foreach (PlayerIndex playerIndex in Enum.GetValues<PlayerIndex>())
+            {
+                currentGamepadStates[(int)playerIndex] = GamePad.GetState(playerIndex);
+            }
 
             int rawX = currentMouseState.X;
             int rawY = currentMouseState.Y;
@@ -110,6 +134,7 @@ namespace NuciXNA.Input
                     currentMouseState.XButton2);
             }
 
+            CheckGamepadButtonStates();
             CheckKeyboardKeyStates();
             CheckMouseButtonStates();
             CheckMouseMoved();
@@ -122,10 +147,24 @@ namespace NuciXNA.Input
         {
             previousKeyState = currentKeyState;
             previousMouseState = currentMouseState;
+            previousGamepadStates = currentGamepadStates;
 
             currentKeyState = new KeyboardState();
             currentMouseState = new MouseState();
+            currentGamepadStates = new GamePadState[4];
         }
+
+        public bool IsGamepadButtonDown(PlayerIndex playerIndex, params Buttons[] buttons)
+            => buttons.All(b => currentGamepadStates[(int)playerIndex].IsButtonDown(b));
+
+        public bool IsAnyGamepadButtonDown(PlayerIndex playerIndex)
+            => IsAnyGamepadButtonDown(playerIndex, Enum.GetValues<Buttons>().Cast<Buttons>());
+
+        public bool IsAnyGamepadButtonDown(PlayerIndex playerIndex, params Buttons[] buttons)
+            => IsAnyGamepadButtonDown(playerIndex, buttons as IEnumerable<Buttons>);
+
+        public bool IsAnyGamepadButtonDown(PlayerIndex playerIndex, IEnumerable<Buttons> buttons)
+            => buttons.Any(b => currentGamepadStates[(int)playerIndex].IsButtonDown(b));
 
         public bool IsKeyDown(params Keys[] keys)
         {
@@ -156,6 +195,34 @@ namespace NuciXNA.Input
             => buttons
                 .Select(GetMouseButtonState)
                 .Any(x => x.IsDown);
+
+        void CheckGamepadButtonStates()
+        {
+            foreach (PlayerIndex playerIndex in Enum.GetValues<PlayerIndex>())
+            {
+                foreach (Buttons button in Enum.GetValues<Buttons>())
+                {
+                    bool isCurrentlyDown = currentGamepadStates[(int)playerIndex].IsButtonDown(button);
+                    bool wasPreviouslyDown = previousGamepadStates[(int)playerIndex].IsButtonDown(button);
+
+                    if (isCurrentlyDown)
+                    {
+                        if (wasPreviouslyDown)
+                        {
+                            OnGamepadButtonHeldDown(this, new GamepadButtonEventArgs(button, ButtonState.HeldDown, playerIndex));
+                        }
+                        else
+                        {
+                            OnGamepadButtonPressed(this, new GamepadButtonEventArgs(button, ButtonState.Pressed, playerIndex));
+                        }
+                    }
+                    else if (!isCurrentlyDown && wasPreviouslyDown)
+                    {
+                        OnGamepadButtonReleased(this, new GamepadButtonEventArgs(button, ButtonState.Released, playerIndex));
+                    }
+                }
+            }
+        }
 
         void CheckKeyboardKeyStates()
         {
@@ -275,6 +342,30 @@ namespace NuciXNA.Input
 
             return null;
         }
+
+        /// <summary>
+        /// Fires when a gamepad button was pressed.
+        /// </summary>
+        /// <param name="sender">Sender object.</param>
+        /// <param name="e">Event arguments.</param>
+        void OnGamepadButtonPressed(object sender, GamepadButtonEventArgs e)
+            => GamepadButtonPressed?.Invoke(sender, e);
+
+        /// <summary>
+        /// Fires when a gamepad button was released.
+        /// </summary>
+        /// <param name="sender">Sender object.</param>
+        /// <param name="e">Event arguments.</param>
+        void OnGamepadButtonReleased(object sender, GamepadButtonEventArgs e)
+            => GamepadButtonReleased?.Invoke(sender, e);
+
+        /// <summary>
+        /// Fires when a gamepad button is held down.
+        /// </summary>
+        /// <param name="sender">Sender object.</param>
+        /// <param name="e">Event arguments.</param>
+        void OnGamepadButtonHeldDown(object sender, GamepadButtonEventArgs e)
+            => GamepadButtonHeldDown?.Invoke(sender, e);
 
         /// <summary>
         /// Fires when a keyboard key was pressed.
