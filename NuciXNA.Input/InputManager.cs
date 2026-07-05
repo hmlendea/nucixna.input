@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using XNAButtonState = Microsoft.Xna.Framework.Input.ButtonState;
 
 using NuciXNA.Primitives;
 using NuciXNA.Primitives.Mapping;
-using System.Threading;
-using Microsoft.Xna.Framework;
 
 namespace NuciXNA.Input
 {
@@ -74,6 +74,9 @@ namespace NuciXNA.Input
 
         static volatile InputManager instance;
         static readonly Lock syncRoot = new();
+        static readonly Keys[] allKeys = Enum.GetValues<Keys>();
+        static readonly Buttons[] allButtons = Enum.GetValues<Buttons>();
+        static readonly PlayerIndex[] allPlayerIndices = Enum.GetValues<PlayerIndex>();
 
         /// <summary>
         /// Gets the instance.
@@ -102,15 +105,17 @@ namespace NuciXNA.Input
         {
             previousKeyState = currentKeyState;
             previousMouseState = currentMouseState;
+
+            GamePadState[] swapTemp = previousGamepadStates;
             previousGamepadStates = currentGamepadStates;
+            currentGamepadStates = swapTemp;
 
             currentKeyState = Keyboard.GetState();
             currentMouseState = Mouse.GetState();
-            currentGamepadStates = new GamePadState[4];
 
-            foreach (PlayerIndex playerIndex in Enum.GetValues<PlayerIndex>())
+            for (int i = 0; i < allPlayerIndices.Length; i++)
             {
-                currentGamepadStates[(int)playerIndex] = GamePad.GetState(playerIndex);
+                currentGamepadStates[i] = GamePad.GetState(allPlayerIndices[i]);
             }
 
             int rawX = currentMouseState.X;
@@ -147,18 +152,21 @@ namespace NuciXNA.Input
         {
             previousKeyState = currentKeyState;
             previousMouseState = currentMouseState;
+
+            GamePadState[] swapTemp = previousGamepadStates;
             previousGamepadStates = currentGamepadStates;
+            currentGamepadStates = swapTemp;
 
             currentKeyState = new KeyboardState();
             currentMouseState = new MouseState();
-            currentGamepadStates = new GamePadState[4];
+            Array.Clear(currentGamepadStates, 0, 4);
         }
 
         public bool IsGamepadButtonDown(PlayerIndex playerIndex, params Buttons[] buttons)
             => buttons.All(b => currentGamepadStates[(int)playerIndex].IsButtonDown(b));
 
         public bool IsAnyGamepadButtonDown(PlayerIndex playerIndex)
-            => IsAnyGamepadButtonDown(playerIndex, Enum.GetValues<Buttons>().Cast<Buttons>());
+            => IsAnyGamepadButtonDown(playerIndex, allButtons);
 
         public bool IsAnyGamepadButtonDown(PlayerIndex playerIndex, params Buttons[] buttons)
             => IsAnyGamepadButtonDown(playerIndex, buttons as IEnumerable<Buttons>);
@@ -172,7 +180,7 @@ namespace NuciXNA.Input
         }
 
         public bool IsAnyKeyDown()
-            => IsAnyKeyDown(Enum.GetValues<Keys>().Cast<Keys>());
+            => IsAnyKeyDown(allKeys);
 
         public bool IsAnyKeyDown(params Keys[] keys)
             => IsAnyKeyDown(keys as IEnumerable<Keys>);
@@ -198,9 +206,9 @@ namespace NuciXNA.Input
 
         void CheckGamepadButtonStates()
         {
-            foreach (PlayerIndex playerIndex in Enum.GetValues<PlayerIndex>())
+            foreach (PlayerIndex playerIndex in allPlayerIndices)
             {
-                foreach (Buttons button in Enum.GetValues<Buttons>())
+                foreach (Buttons button in allButtons)
                 {
                     bool isCurrentlyDown = currentGamepadStates[(int)playerIndex].IsButtonDown(button);
                     bool wasPreviouslyDown = previousGamepadStates[(int)playerIndex].IsButtonDown(button);
@@ -226,23 +234,24 @@ namespace NuciXNA.Input
 
         void CheckKeyboardKeyStates()
         {
-            foreach (Keys key in Enum.GetValues<Keys>())
-            {
-                bool isCurrentlyDown = currentKeyState.IsKeyDown(key);
-                bool wasPreviouslyDown = previousKeyState.IsKeyDown(key);
+            Keys[] currentPressedKeys = currentKeyState.GetPressedKeys();
+            Keys[] previousPressedKeys = previousKeyState.GetPressedKeys();
 
-                if (isCurrentlyDown)
+            foreach (Keys key in currentPressedKeys)
+            {
+                if (previousKeyState.IsKeyDown(key))
                 {
-                    if (wasPreviouslyDown)
-                    {
-                        OnKeyboardKeyHeldDown(this, new KeyboardKeyEventArgs(key, ButtonState.HeldDown));
-                    }
-                    else
-                    {
-                        OnKeyboardKeyPressed(this, new KeyboardKeyEventArgs(key, ButtonState.Pressed));
-                    }
+                    OnKeyboardKeyHeldDown(this, new KeyboardKeyEventArgs(key, ButtonState.HeldDown));
                 }
-                else if (!isCurrentlyDown && wasPreviouslyDown)
+                else
+                {
+                    OnKeyboardKeyPressed(this, new KeyboardKeyEventArgs(key, ButtonState.Pressed));
+                }
+            }
+
+            foreach (Keys key in previousPressedKeys)
+            {
+                if (!currentKeyState.IsKeyDown(key))
                 {
                     OnKeyboardKeyReleased(this, new KeyboardKeyEventArgs(key, ButtonState.Released));
                 }
@@ -330,17 +339,12 @@ namespace NuciXNA.Input
                 return ButtonState.Pressed;
             }
 
-            if (currentState == XNAButtonState.Released)
+            if (previousState == XNAButtonState.Pressed)
             {
-                if (previousState == XNAButtonState.Released)
-                {
-                    return ButtonState.Idle;
-                }
-
                 return ButtonState.Released;
             }
 
-            return null;
+            return ButtonState.Idle;
         }
 
         /// <summary>

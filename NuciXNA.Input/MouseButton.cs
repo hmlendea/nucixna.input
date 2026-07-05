@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace NuciXNA.Input
 {
@@ -9,6 +8,31 @@ namespace NuciXNA.Input
     /// </summary>
     public sealed class MouseButton : IEquatable<MouseButton>
     {
+        /// <summary>
+        /// The left mouse button.
+        /// </summary>
+        public static readonly MouseButton Left = new(1, nameof(Left));
+
+        /// <summary>
+        /// The right mouse button.
+        /// </summary>
+        public static readonly MouseButton Right = new(2, nameof(Right));
+
+        /// <summary>
+        /// The middle mouse button.
+        /// </summary>
+        public static readonly MouseButton Middle = new(3, nameof(Middle));
+
+        /// <summary>
+        /// The back mouse button.
+        /// </summary>
+        public static readonly MouseButton Back = new(4, nameof(Back));
+
+        /// <summary>
+        /// The forward mouse button.
+        /// </summary>
+        public static readonly MouseButton Forward = new(5, nameof(Forward));
+
         static readonly Dictionary<int, MouseButton> entries = new()
         {
             { Left.Id, Left },
@@ -18,30 +42,7 @@ namespace NuciXNA.Input
             { Forward.Id, Forward }
         };
 
-        /// <summary>
-        /// The left mouse button.
-        /// </summary>
-        public static MouseButton Left => new(1, nameof(Left));
-
-        /// <summary>
-        /// The right mouse button.
-        /// </summary>
-        public static MouseButton Right => new(2, nameof(Right));
-
-        /// <summary>
-        /// The middle mouse button.
-        /// </summary>
-        public static MouseButton Middle => new(3, nameof(Middle));
-
-        /// <summary>
-        /// The back mouse button.
-        /// </summary>
-        public static MouseButton Back => new(4, nameof(Back));
-
-        /// <summary>
-        /// The forward mouse button.
-        /// </summary>
-        public static MouseButton Forward => new(5, nameof(Forward));
+        static readonly MouseButton[] cachedValues = [Left, Right, Middle, Back, Forward];
 
         public int Id { get; }
 
@@ -65,8 +66,15 @@ namespace NuciXNA.Input
 
         public static MouseButton FromName(string name)
         {
-            MouseButton button = entries.Values.FirstOrDefault(x => x.Name == name) ?? throw new ArgumentException($"A {nameof(MouseButton)} with the name \"{name}\" does not exist");
-            return button;
+            foreach (MouseButton button in cachedValues)
+            {
+                if (button.Name.Equals(name))
+                {
+                    return button;
+                }
+            }
+
+            throw new ArgumentException($"A {nameof(MouseButton)} with the name \"{name}\" does not exist");
         }
 
         public override string ToString() => Name;
@@ -110,7 +118,7 @@ namespace NuciXNA.Input
 
         public static bool operator !=(MouseButton me, MouseButton other) => !(me == other);
 
-        public static IEnumerable<MouseButton> GetValues() => entries.Values.ToList();
+        public static IEnumerable<MouseButton> GetValues() => cachedValues;
 
         public static implicit operator int(MouseButton me) => me.Id;
 
