@@ -13,24 +13,27 @@ namespace NuciXNA.Input
     /// <param name="button">Button.</param>
     /// <param name="buttonState">Button state.</param>
     /// <param name="location">Mouse location.</param>
-    public class MouseButtonEventArgs(MouseButton button, ButtonState buttonState, Point2D location)
+    public sealed class MouseButtonEventArgs(
+        MouseButton button,
+        ButtonState buttonState,
+        Point2D location)
     {
         /// <summary>
         /// Gets the button.
         /// </summary>
         /// <value>The button.</value>
-        public MouseButton Button { get; private set; } = button;
+        public MouseButton Button { get; } = button;
 
         /// <summary>
         /// Gets the state of the button.
         /// </summary>
         /// <value>The state of the button.</value>
-        public ButtonState ButtonState { get; private set; } = buttonState;
+        public ButtonState ButtonState { get; } = buttonState;
 
         /// <summary>
         /// Gets location of the mouse.
         /// </summary>
         /// <value>The mouse location.</value>
-        public Point2D Location { get; private set; } = location;
+        public Point2D Location { get; } = location;
     }
 }

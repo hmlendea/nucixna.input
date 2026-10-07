@@ -15,8 +15,19 @@ namespace NuciXNA.Input
     /// <summary>
     /// Input manager.
     /// </summary>
-    public class InputManager
+    public sealed class InputManager : IInputManager
     {
+        static volatile InputManager instance;
+        static readonly Lock syncRoot = new();
+        static readonly Keys[] allKeys = Enum.GetValues<Keys>();
+        static readonly Buttons[] allButtons = Enum.GetValues<Buttons>();
+        static readonly PlayerIndex[] allPlayerIndices = Enum.GetValues<PlayerIndex>();
+
+        GamePadState[] currentGamepadStates = new GamePadState[4];
+        GamePadState[] previousGamepadStates = new GamePadState[4];
+        KeyboardState currentKeyState, previousKeyState;
+        MouseState currentMouseState, previousMouseState;
+
         /// <summary>
         /// Occurs when a mouse button was pressed.
         /// </summary>
@@ -67,17 +78,6 @@ namespace NuciXNA.Input
         /// </summary>
         public event KeyboardKeyEventHandler KeyboardKeyHeldDown;
 
-        GamePadState[] currentGamepadStates = new GamePadState[4];
-        GamePadState[] previousGamepadStates = new GamePadState[4];
-        KeyboardState currentKeyState, previousKeyState;
-        MouseState currentMouseState, previousMouseState;
-
-        static volatile InputManager instance;
-        static readonly Lock syncRoot = new();
-        static readonly Keys[] allKeys = Enum.GetValues<Keys>();
-        static readonly Buttons[] allButtons = Enum.GetValues<Buttons>();
-        static readonly PlayerIndex[] allPlayerIndices = Enum.GetValues<PlayerIndex>();
-
         /// <summary>
         /// Gets the instance.
         /// </summary>
@@ -99,8 +99,9 @@ namespace NuciXNA.Input
         }
 
         /// <summary>
-        /// Updates the content.
+        /// Updates the input state.
         /// </summary>
+        /// <param name="window">Game window.</param>
         public void Update(GameWindow window)
         {
             previousKeyState = currentKeyState;
@@ -162,43 +163,102 @@ namespace NuciXNA.Input
             Array.Clear(currentGamepadStates, 0, 4);
         }
 
+        /// <summary>
+        /// Checks if a gamepad button is down.
+        /// </summary>
+        /// <param name="playerIndex">Player index.</param>
+        /// <param name="buttons">Buttons to check.</param>
+        /// <returns>True if all buttons are down.</returns>
         public bool IsGamepadButtonDown(PlayerIndex playerIndex, params Buttons[] buttons)
             => buttons.All(b => currentGamepadStates[(int)playerIndex].IsButtonDown(b));
 
+        /// <summary>
+        /// Checks if any gamepad button is down.
+        /// </summary>
+        /// <param name="playerIndex">Player index.</param>
+        /// <returns>True if any button is down.</returns>
         public bool IsAnyGamepadButtonDown(PlayerIndex playerIndex)
             => IsAnyGamepadButtonDown(playerIndex, allButtons);
 
+        /// <summary>
+        /// Checks if any gamepad button is down.
+        /// </summary>
+        /// <param name="playerIndex">Player index.</param>
+        /// <param name="buttons">Buttons to check.</param>
+        /// <returns>True if any button is down.</returns>
         public bool IsAnyGamepadButtonDown(PlayerIndex playerIndex, params Buttons[] buttons)
             => IsAnyGamepadButtonDown(playerIndex, buttons as IEnumerable<Buttons>);
 
+        /// <summary>
+        /// Checks if any gamepad button is down.
+        /// </summary>
+        /// <param name="playerIndex">Player index.</param>
+        /// <param name="buttons">Buttons to check.</param>
+        /// <returns>True if any button is down.</returns>
         public bool IsAnyGamepadButtonDown(PlayerIndex playerIndex, IEnumerable<Buttons> buttons)
             => buttons.Any(b => currentGamepadStates[(int)playerIndex].IsButtonDown(b));
 
+        /// <summary>
+        /// Checks if a key is down.
+        /// </summary>
+        /// <param name="keys">Keys to check.</param>
+        /// <returns>True if all keys are down.</returns>
         public bool IsKeyDown(params Keys[] keys)
-        {
-            return keys.All(currentKeyState.IsKeyDown);
-        }
+            => keys.All(currentKeyState.IsKeyDown);
 
+        /// <summary>
+        /// Checks if any key is down.
+        /// </summary>
+        /// <returns>True if any key is down.</returns>
         public bool IsAnyKeyDown()
             => IsAnyKeyDown(allKeys);
 
+        /// <summary>
+        /// Checks if any key is down.
+        /// </summary>
+        /// <param name="keys">Keys to check.</param>
+        /// <returns>True if any key is down.</returns>
         public bool IsAnyKeyDown(params Keys[] keys)
             => IsAnyKeyDown(keys as IEnumerable<Keys>);
 
+        /// <summary>
+        /// Checks if any key is down.
+        /// </summary>
+        /// <param name="keys">Keys to check.</param>
+        /// <returns>True if any key is down.</returns>
         public bool IsAnyKeyDown(IEnumerable<Keys> keys)
             => keys.Any(currentKeyState.IsKeyDown);
 
+        /// <summary>
+        /// Checks if a mouse button is down.
+        /// </summary>
+        /// <param name="buttons">Buttons to check.</param>
+        /// <returns>True if all buttons are down.</returns>
         public bool IsMouseButtonDown(params MouseButton[] buttons)
             => buttons
                 .Select(GetMouseButtonState)
                 .All(x => x.IsDown);
 
+        /// <summary>
+        /// Checks if any mouse button is down.
+        /// </summary>
+        /// <returns>True if any button is down.</returns>
         public bool IsAnyMouseButtonDown()
             => IsAnyMouseButtonDown(MouseButton.GetValues());
 
+        /// <summary>
+        /// Checks if any mouse button is down.
+        /// </summary>
+        /// <param name="buttons">Buttons to check.</param>
+        /// <returns>True if any button is down.</returns>
         public bool IsAnyMouseButtonDown(params MouseButton[] buttons)
             => IsAnyMouseButtonDown(buttons as IEnumerable<MouseButton>);
 
+        /// <summary>
+        /// Checks if any mouse button is down.
+        /// </summary>
+        /// <param name="buttons">Buttons to check.</param>
+        /// <returns>True if any button is down.</returns>
         public bool IsAnyMouseButtonDown(IEnumerable<MouseButton> buttons)
             => buttons
                 .Select(GetMouseButtonState)
@@ -429,10 +489,22 @@ namespace NuciXNA.Input
 
         // TODO: Everything below this is required by a workaround to a problem and should be removed as soon as it is properly fixed
 
+        /// <summary>
+        /// Gets the current mouse location.
+        /// </summary>
+        /// <value>The current mouse location.</value>
         public Point2D MouseLocation => new(currentMouseState.Position.X, currentMouseState.Position.Y);
+
+        /// <summary>
+        /// Gets or sets whether mouse button input was handled.
+        /// </summary>
         public bool MouseButtonInputHandled { get; set; }
 
+        /// <summary>
+        /// Checks if the left mouse button was clicked.
+        /// </summary>
+        /// <returns>True if the left mouse button was clicked.</returns>
         public bool IsLeftMouseButtonClicked()
-            => GetMouseButtonState(MouseButton.Left).Equals(ButtonState.Pressed);
+            => object.Equals(GetMouseButtonState(MouseButton.Left), ButtonState.Pressed);
     }
 }

@@ -19,7 +19,7 @@ namespace NuciXNA.Input
         public static readonly ButtonState Pressed = new(1, nameof(Pressed), true);
 
         /// <summary>
-        /// They mouse button was just released.
+        /// The mouse button was just released.
         /// </summary>
         public static readonly ButtonState Released = new(2, nameof(Released), false);
 

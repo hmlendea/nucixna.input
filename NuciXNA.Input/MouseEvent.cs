@@ -11,18 +11,20 @@ namespace NuciXNA.Input
     /// Mouse event arguments.
     /// </summary>
     /// <param name="location">Mouse location.</param>
-    public class MouseEventArgs(Point2D location, Point2D previousLocation)
+    public sealed class MouseEventArgs(
+        Point2D location,
+        Point2D previousLocation)
     {
         /// <summary>
         /// Gets current location of the mouse.
         /// </summary>
         /// <value>The current mouse location.</value>
-        public Point2D Location { get; private set; } = location;
+        public Point2D Location { get; } = location;
 
         /// <summary>
         /// Gets previous location of the mouse.
         /// </summary>
         /// <value>The previous mouse location.</value>
-        public Point2D PreviousLocation { get; private set; } = previousLocation;
+        public Point2D PreviousLocation { get; } = previousLocation;
     }
 }
