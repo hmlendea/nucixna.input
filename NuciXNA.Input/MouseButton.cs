@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace NuciXNA.Input
 {
     /// <summary>
-    /// Button state.
+    /// Mouse button.
     /// </summary>
     public sealed class MouseButton : IEquatable<MouseButton>
     {
@@ -68,7 +68,7 @@ namespace NuciXNA.Input
         {
             foreach (MouseButton button in cachedValues)
             {
-                if (button.Name.Equals(name))
+                if (string.Equals(button.Name, name))
                 {
                     return button;
                 }
@@ -81,6 +81,8 @@ namespace NuciXNA.Input
 
         public override int GetHashCode() => Id.GetHashCode();
 
+        public static IEnumerable<MouseButton> GetValues() => cachedValues;
+
         public bool Equals(MouseButton other)
         {
             if (other is null)
@@ -88,12 +90,7 @@ namespace NuciXNA.Input
                 return false;
             }
 
-            if (!other.Id.Equals(Id))
-            {
-                return false;
-            }
-
-            return true;
+            return object.Equals(other.Id, Id);
         }
 
         public override bool Equals(object obj)
@@ -117,8 +114,6 @@ namespace NuciXNA.Input
         }
 
         public static bool operator !=(MouseButton me, MouseButton other) => !(me == other);
-
-        public static IEnumerable<MouseButton> GetValues() => cachedValues;
 
         public static implicit operator int(MouseButton me) => me.Id;
 
