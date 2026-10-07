@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using XNAButtonState = Microsoft.Xna.Framework.Input.ButtonState;
 
 using NuciXNA.Primitives;
+using NuciXNA.Primitives.Mapping;
 
 namespace NuciXNA.Input
 {
