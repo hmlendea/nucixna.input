@@ -17,15 +17,17 @@ namespace NuciXNA.Input
     /// </summary>
     public sealed class InputManager : IInputManager
     {
-        private static readonly Lock syncRoot = new();
+        private static readonly Lock instanceCreationLock = new();
         private static readonly Keys[] allKeys = Enum.GetValues<Keys>();
         private static readonly Buttons[] allButtons = Enum.GetValues<Buttons>();
         private static readonly PlayerIndex[] allPlayerIndices = Enum.GetValues<PlayerIndex>();
 
-        private static volatile InputManager instance;
+        private static volatile InputManager? instance;
 
-        private GamePadState[] currentGamepadStates = new GamePadState[4];
-        private GamePadState[] previousGamepadStates = new GamePadState[4];
+        private GamePadState[] currentGamepadStates =
+            new GamePadState[allPlayerIndices.Length];
+        private GamePadState[] previousGamepadStates =
+            new GamePadState[allPlayerIndices.Length];
         private KeyboardState currentKeyState;
         private KeyboardState previousKeyState;
         private MouseState currentMouseState;
@@ -106,41 +108,17 @@ namespace NuciXNA.Input
         /// <param name="window">Game window.</param>
         public void Update(GameWindow window)
         {
-            previousKeyState = currentKeyState;
-            previousMouseState = currentMouseState;
-
-            GamePadState[] swapTemp = previousGamepadStates;
-            previousGamepadStates = currentGamepadStates;
-            currentGamepadStates = swapTemp;
+            SwapStateBuffers();
 
             currentKeyState = Keyboard.GetState();
             currentMouseState = Mouse.GetState();
 
-            for (int i = 0; i < allPlayerIndices.Length; i++)
+            foreach (PlayerIndex playerIndex in allPlayerIndices)
             {
-                currentGamepadStates[i] = GamePad.GetState(allPlayerIndices[i]);
+                currentGamepadStates[(int)playerIndex] = GamePad.GetState(playerIndex);
             }
 
-            int rawX = currentMouseState.X;
-            int rawY = currentMouseState.Y;
-
-            // On Linux/SDL2 with the window on a monitor to the LEFT of the primary,
-            // Mouse.GetState() returns both X and Y in virtual-desktop coordinates
-            // (negative when the left monitor sits at a negative virtual-desktop offset).
-            // ClientBounds holds the client-area origin in the same coordinate space,
-            // so adding it converts to client-relative coords for both axes.
-            if (rawX < 0)
-            {
-                currentMouseState = new MouseState(
-                    rawX + window.ClientBounds.X,
-                    rawY + window.ClientBounds.Y,
-                    currentMouseState.ScrollWheelValue,
-                    currentMouseState.LeftButton,
-                    currentMouseState.MiddleButton,
-                    currentMouseState.RightButton,
-                    currentMouseState.XButton1,
-                    currentMouseState.XButton2);
-            }
+            CorrectMouseCoordinates(window);
 
             CheckGamepadButtonStates();
             CheckKeyboardKeyStates();
@@ -153,16 +131,11 @@ namespace NuciXNA.Input
         /// </summary>
         public void ResetInputStates()
         {
-            previousKeyState = currentKeyState;
-            previousMouseState = currentMouseState;
-
-            GamePadState[] swapTemp = previousGamepadStates;
-            previousGamepadStates = currentGamepadStates;
-            currentGamepadStates = swapTemp;
+            SwapStateBuffers();
 
             currentKeyState = new KeyboardState();
             currentMouseState = new MouseState();
-            Array.Clear(currentGamepadStates, 0, 4);
+            Array.Clear(currentGamepadStates);
         }
 
         /// <summary>
@@ -172,7 +145,7 @@ namespace NuciXNA.Input
         /// <param name="buttons">Buttons to check.</param>
         /// <returns>True if all buttons are down.</returns>
         public bool IsGamepadButtonDown(PlayerIndex playerIndex, params Buttons[] buttons)
-            => buttons.All(b => currentGamepadStates[(int)playerIndex].IsButtonDown(b));
+            => buttons.All(GetGamepadState(playerIndex).IsButtonDown);
 
         /// <summary>
         /// Checks if any gamepad button is down.
@@ -189,7 +162,7 @@ namespace NuciXNA.Input
         /// <param name="buttons">Buttons to check.</param>
         /// <returns>True if any button is down.</returns>
         public bool IsAnyGamepadButtonDown(PlayerIndex playerIndex, params Buttons[] buttons)
-            => IsAnyGamepadButtonDown(playerIndex, buttons as IEnumerable<Buttons>);
+            => IsAnyGamepadButtonDown(playerIndex, (IEnumerable<Buttons>)buttons);
 
         /// <summary>
         /// Checks if any gamepad button is down.
@@ -200,7 +173,7 @@ namespace NuciXNA.Input
         public bool IsAnyGamepadButtonDown(
             PlayerIndex playerIndex,
             IEnumerable<Buttons> buttons)
-            => buttons.Any(b => currentGamepadStates[(int)playerIndex].IsButtonDown(b));
+            => buttons.Any(GetGamepadState(playerIndex).IsButtonDown);
 
         /// <summary>
         /// Checks if a key is down.
@@ -223,7 +196,7 @@ namespace NuciXNA.Input
         /// <param name="keys">Keys to check.</param>
         /// <returns>True if any key is down.</returns>
         public bool IsAnyKeyDown(params Keys[] keys)
-            => IsAnyKeyDown(keys as IEnumerable<Keys>);
+            => IsAnyKeyDown((IEnumerable<Keys>)keys);
 
         /// <summary>
         /// Checks if any key is down.
@@ -239,9 +212,7 @@ namespace NuciXNA.Input
         /// <param name="buttons">Buttons to check.</param>
         /// <returns>True if all buttons are down.</returns>
         public bool IsMouseButtonDown(params MouseButton[] buttons)
-            => buttons
-                .Select(GetMouseButtonState)
-                .All(x => x.IsDown);
+            => buttons.All(button => GetMouseButtonState(button).IsDown);
 
         /// <summary>
         /// Checks if any mouse button is down.
@@ -256,7 +227,7 @@ namespace NuciXNA.Input
         /// <param name="buttons">Buttons to check.</param>
         /// <returns>True if any button is down.</returns>
         public bool IsAnyMouseButtonDown(params MouseButton[] buttons)
-            => IsAnyMouseButtonDown(buttons as IEnumerable<MouseButton>);
+            => IsAnyMouseButtonDown((IEnumerable<MouseButton>)buttons);
 
         /// <summary>
         /// Checks if any mouse button is down.
@@ -264,22 +235,67 @@ namespace NuciXNA.Input
         /// <param name="buttons">Buttons to check.</param>
         /// <returns>True if any button is down.</returns>
         public bool IsAnyMouseButtonDown(IEnumerable<MouseButton> buttons)
-            => buttons
-                .Select(GetMouseButtonState)
-                .Any(x => x.IsDown);
+            => buttons.Any(button => GetMouseButtonState(button).IsDown);
+
+        /// <summary>
+        /// Checks if the left mouse button was clicked.
+        /// </summary>
+        /// <returns>True if the left mouse button was clicked.</returns>
+        public bool IsLeftMouseButtonClicked()
+            => object.Equals(GetMouseButtonState(MouseButton.Left), ButtonState.Pressed);
 
         private static InputManager GetInstance()
         {
-            if (instance is null)
+            InputManager? currentInstance = instance;
+
+            if (currentInstance is not null)
             {
-                lock (syncRoot)
-                {
-                    instance ??= new InputManager();
-                }
+                return currentInstance;
             }
 
-            return instance;
+            lock (instanceCreationLock)
+            {
+                instance ??= new InputManager();
+
+                return instance;
+            }
         }
+
+        private void SwapStateBuffers()
+        {
+            previousKeyState = currentKeyState;
+            previousMouseState = currentMouseState;
+
+            GamePadState[] swapBuffer = previousGamepadStates;
+            previousGamepadStates = currentGamepadStates;
+            currentGamepadStates = swapBuffer;
+        }
+
+        private void CorrectMouseCoordinates(GameWindow window)
+        {
+            int virtualDesktopX = currentMouseState.X;
+
+            // On Linux/SDL2 with the window on a monitor to the LEFT of the primary,
+            // Mouse.GetState() returns both X and Y in virtual-desktop coordinates
+            // (negative when the left monitor sits at a negative virtual-desktop offset).
+            // ClientBounds holds the client-area origin in the same coordinate space,
+            // so adding it converts to client-relative coords for both axes.
+            if (virtualDesktopX < 0)
+            {
+                currentMouseState = new MouseState(
+                    virtualDesktopX + window.ClientBounds.X,
+                    currentMouseState.Y + window.ClientBounds.Y,
+                    currentMouseState.ScrollWheelValue,
+                    currentMouseState.LeftButton,
+                    currentMouseState.MiddleButton,
+                    currentMouseState.RightButton,
+                    currentMouseState.XButton1,
+                    currentMouseState.XButton2);
+            }
+        }
+
+        private GamePadState GetGamepadState(PlayerIndex playerIndex)
+            => currentGamepadStates[(int)playerIndex];
 
         private void CheckGamepadButtonStates()
         {
@@ -294,10 +310,10 @@ namespace NuciXNA.Input
 
         private void CheckGamepadButtonState(PlayerIndex playerIndex, Buttons button)
         {
-            GamePadState currentState = currentGamepadStates[(int)playerIndex];
-            GamePadState previousState = previousGamepadStates[(int)playerIndex];
-            bool isCurrentlyDown = currentState.IsButtonDown(button);
-            bool wasPreviouslyDown = previousState.IsButtonDown(button);
+            GamePadState currentGamePadState = currentGamepadStates[(int)playerIndex];
+            GamePadState previousGamePadState = previousGamepadStates[(int)playerIndex];
+            bool isCurrentlyDown = currentGamePadState.IsButtonDown(button);
+            bool wasPreviouslyDown = previousGamePadState.IsButtonDown(button);
 
             if (isCurrentlyDown)
             {
@@ -377,22 +393,22 @@ namespace NuciXNA.Input
 
             foreach (MouseButton button in MouseButton.GetValues())
             {
-                ButtonState state = GetMouseButtonState(button);
+                ButtonState buttonState = GetMouseButtonState(button);
 
                 MouseButtonEventArgs eventArgs = new(
                     button,
-                    state,
+                    buttonState,
                     cursorLocation);
 
-                if (state == ButtonState.Pressed)
+                if (object.Equals(buttonState, ButtonState.Pressed))
                 {
                     OnMouseButtonPressed(this, eventArgs);
                 }
-                else if (state == ButtonState.Released)
+                else if (object.Equals(buttonState, ButtonState.Released))
                 {
                     OnMouseButtonReleased(this, eventArgs);
                 }
-                else if (state == ButtonState.HeldDown)
+                else if (object.Equals(buttonState, ButtonState.HeldDown))
                 {
                     OnMouseButtonHeldDown(this, eventArgs);
                 }
@@ -404,7 +420,7 @@ namespace NuciXNA.Input
             Point position = currentMouseState.Position;
             Point previousPosition = previousMouseState.Position;
 
-            if (position.Equals(previousPosition))
+            if (object.Equals(position, previousPosition))
             {
                 return;
             }
@@ -418,38 +434,12 @@ namespace NuciXNA.Input
 
         private ButtonState GetMouseButtonState(MouseButton button)
         {
-            XNAButtonState currentState = XNAButtonState.Released;
-            XNAButtonState previousState = XNAButtonState.Released;
+            XNAButtonState currentButtonState = GetButtonState(button, currentMouseState);
+            XNAButtonState previousButtonState = GetButtonState(button, previousMouseState);
 
-            if (button == MouseButton.Left)
+            if (object.Equals(currentButtonState, XNAButtonState.Pressed))
             {
-                currentState = currentMouseState.LeftButton;
-                previousState = previousMouseState.LeftButton;
-            }
-            else if (button == MouseButton.Right)
-            {
-                currentState = currentMouseState.RightButton;
-                previousState = previousMouseState.RightButton;
-            }
-            else if (button == MouseButton.Middle)
-            {
-                currentState = currentMouseState.MiddleButton;
-                previousState = previousMouseState.MiddleButton;
-            }
-            else if (button == MouseButton.Back)
-            {
-                currentState = currentMouseState.XButton1;
-                previousState = previousMouseState.XButton1;
-            }
-            else if (button == MouseButton.Forward)
-            {
-                currentState = currentMouseState.XButton2;
-                previousState = previousMouseState.XButton2;
-            }
-
-            if (currentState == XNAButtonState.Pressed)
-            {
-                if (previousState == XNAButtonState.Pressed)
+                if (object.Equals(previousButtonState, XNAButtonState.Pressed))
                 {
                     return ButtonState.HeldDown;
                 }
@@ -457,12 +447,42 @@ namespace NuciXNA.Input
                 return ButtonState.Pressed;
             }
 
-            if (previousState == XNAButtonState.Pressed)
+            if (object.Equals(previousButtonState, XNAButtonState.Pressed))
             {
                 return ButtonState.Released;
             }
 
             return ButtonState.Idle;
+        }
+
+        private static XNAButtonState GetButtonState(MouseButton button, MouseState mouseState)
+        {
+            if (object.Equals(button, MouseButton.Left))
+            {
+                return mouseState.LeftButton;
+            }
+
+            if (object.Equals(button, MouseButton.Right))
+            {
+                return mouseState.RightButton;
+            }
+
+            if (object.Equals(button, MouseButton.Middle))
+            {
+                return mouseState.MiddleButton;
+            }
+
+            if (object.Equals(button, MouseButton.Back))
+            {
+                return mouseState.XButton1;
+            }
+
+            if (object.Equals(button, MouseButton.Forward))
+            {
+                return mouseState.XButton2;
+            }
+
+            return XNAButtonState.Released;
         }
 
         /// <summary>
@@ -544,12 +564,5 @@ namespace NuciXNA.Input
         /// <param name="e">Event arguments.</param>
         private void OnMouseMoved(object sender, MouseEventArgs e)
             => MouseMoved?.Invoke(sender, e);
-
-        /// <summary>
-        /// Checks if the left mouse button was clicked.
-        /// </summary>
-        /// <returns>True if the left mouse button was clicked.</returns>
-        public bool IsLeftMouseButtonClicked()
-            => object.Equals(GetMouseButtonState(MouseButton.Left), ButtonState.Pressed);
     }
 }

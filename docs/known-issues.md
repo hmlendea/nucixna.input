@@ -37,11 +37,11 @@
 **File:** `InputManager.cs`, lines 65-75
 
 ```csharp
-if (rawX < 0)
+if (virtualDesktopX < 0)
 {
     currentMouseState = new MouseState(
-        rawX + window.ClientBounds.X,
-        rawY + window.ClientBounds.Y,  // Y corrected unconditionally
+        virtualDesktopX + window.ClientBounds.X,
+        currentMouseState.Y + window.ClientBounds.Y,  // Y corrected unconditionally
         ...
     );
 }
@@ -53,20 +53,20 @@ if (rawX < 0)
 
 **Fix needed:** Check both X and Y against `ClientBounds`.
 
-### 2. Workaround Fields Marked TODO
-**File:** `InputManager.cs`, lines 430-434
+### 2. Workaround Fields Retained For Backwards Compatibility
+**File:** `InputManager.cs`
 
 ```csharp
 public Point2D MouseLocation => new(currentMouseState.Position.X, currentMouseState.Position.Y);
 public bool MouseButtonInputHandled { get; set; }
 
 public bool IsLeftMouseButtonClicked()
-    => GetMouseButtonState(MouseButton.Left).Equals(ButtonState.Pressed);
+    => object.Equals(GetMouseButtonState(MouseButton.Left), ButtonState.Pressed);
 ```
 
-**Status:** Marked `// TODO: Everything below this is required by a workaround and should be removed as soon as it is properly fixed`
+**Status:** Part of the public NuGet surface; kept for backwards compatibility rather than removed.
 
-**Impact:** Public API surface includes temporary workaround.
+**Impact:** The public API surface keeps the original workaround members.
 
 ### 3. HeldDown Events Fire Every Frame
 **Behavior:** `KeyboardKeyHeldDown`, `MouseButtonHeldDown`, `GamepadButtonHeldDown` fire **every frame** while input held.

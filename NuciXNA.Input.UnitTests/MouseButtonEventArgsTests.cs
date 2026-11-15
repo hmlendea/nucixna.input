@@ -1,41 +1,44 @@
 using NuciXNA.Primitives;
+
 using NUnit.Framework;
 
 namespace NuciXNA.Input.UnitTests
 {
     [TestFixture]
-
     public sealed class MouseButtonEventArgsTests
     {
         [Test]
-        public void GivenMouseButtonEventArgs_WhenCreated_ThenButtonIsSetCorrectly()
+        public static void GivenMouseButtonEventArgs_WhenCreated_ThenButtonIsSetCorrectly()
         {
-            MouseButtonEventArgs args = new(
+            MouseButtonEventArgs eventArgs = new(
                 MouseButton.Left,
                 ButtonState.Pressed,
-                new Point2D(10, 20));
+                new Point2D(16, 32));
 
-            Assert.That(args.Button, Is.EqualTo(MouseButton.Left));
+            Assert.That(eventArgs.Button, Is.EqualTo(MouseButton.Left));
         }
 
         [Test]
-        public void GivenMouseButtonEventArgs_WhenCreated_ThenButtonStateIsSetCorrectly()
+        public static void GivenMouseButtonEventArgs_WhenCreated_ThenButtonStateIsSetCorrectly()
         {
-            MouseButtonEventArgs args = new(
+            MouseButtonEventArgs eventArgs = new(
                 MouseButton.Right,
                 ButtonState.Released,
-                new Point2D(0, 0));
+                new Point2D(4, 8));
 
-            Assert.That(args.ButtonState, Is.EqualTo(ButtonState.Released));
+            Assert.That(eventArgs.ButtonState, Is.EqualTo(ButtonState.Released));
         }
 
         [Test]
-        public void GivenMouseButtonEventArgs_WhenCreated_ThenLocationIsSetCorrectly()
+        public static void GivenMouseButtonEventArgs_WhenCreated_ThenLocationIsSetCorrectly()
         {
-            Point2D location = new(42, 7);
-            MouseButtonEventArgs args = new(MouseButton.Middle, ButtonState.HeldDown, location);
+            Point2D location = new(42, 64);
+            MouseButtonEventArgs eventArgs = new(
+                MouseButton.Middle,
+                ButtonState.HeldDown,
+                location);
 
-            Assert.That(args.Location, Is.EqualTo(location));
+            Assert.That(eventArgs.Location, Is.EqualTo(location));
         }
     }
 }

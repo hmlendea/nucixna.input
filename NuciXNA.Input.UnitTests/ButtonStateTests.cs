@@ -9,7 +9,7 @@ namespace NuciXNA.Input.UnitTests
     public sealed class ButtonStateTests
     {
         [Test]
-        public void GivenStateValues_WhenCheckingIsDown_ThenOnlyPressedAndHeldDownAreDown()
+        public static void GivenStateValues_WhenCheckingIsDown_ThenOnlyTwoAreDown()
         {
             Assert.That(ButtonState.Idle.IsDown, Is.False);
             Assert.That(ButtonState.Pressed.IsDown);
@@ -18,166 +18,172 @@ namespace NuciXNA.Input.UnitTests
         }
 
         [Test]
-        public void GivenExistingIdentifier_WhenCallingFromId_ThenReturnsTheMatchingState()
+        public static void GivenExistingIdentifier_WhenCallingFromId_ThenReturnsTheState()
         {
-            foreach (ButtonState state in ButtonState.GetValues())
+            foreach (ButtonState buttonState in ButtonState.GetValues())
             {
-                Assert.That(ButtonState.FromId(state.Id), Is.EqualTo(state));
+                Assert.That(ButtonState.FromId(buttonState.Id), Is.EqualTo(buttonState));
             }
         }
 
         [Test]
-        public void GivenInexistentIdentifier_WhenCallingFromId_ThenThrowsArgumentException()
+        public static void GivenInexistentIdentifier_WhenCallingFromId_ThenThrows()
             => Assert.Throws<ArgumentException>(() => ButtonState.FromId(873));
 
         [Test]
-        public void GivenExistingName_WhenCallingFromName_ThenReturnsTheMatchingState()
+        public static void GivenExistingName_WhenCallingFromName_ThenReturnsTheMatchingState()
         {
-            foreach (ButtonState state in ButtonState.GetValues())
+            foreach (ButtonState buttonState in ButtonState.GetValues())
             {
-                Assert.That(ButtonState.FromName(state.Name), Is.EqualTo(state));
+                Assert.That(ButtonState.FromName(buttonState.Name), Is.EqualTo(buttonState));
             }
         }
 
         [Test]
-        public void GivenInexistentName_WhenCallingFromName_ThenThrowsArgumentException()
-            => Assert.Throws<ArgumentException>(() => ButtonState.FromName("Hori"));
+        public static void GivenInexistentName_WhenCallingFromName_ThenThrowsArgumentException()
+            => Assert.Throws<ArgumentException>(() => ButtonState.FromName("Testy McTestface"));
 
         [Test]
-        public void GivenState_WhenCallingToString_ThenReturnsItsName()
+        public static void GivenState_WhenCallingToString_ThenReturnsItsName()
         {
-            foreach (ButtonState state in ButtonState.GetValues())
+            foreach (ButtonState buttonState in ButtonState.GetValues())
             {
-                Assert.That(state.ToString(), Is.EqualTo(state.Name));
+                Assert.That(buttonState.ToString(), Is.EqualTo(buttonState.Name));
             }
         }
 
         [Test]
-        public void GivenState_WhenCallingGetHashCode_ThenReturnsIdentifierHash()
+        public static void GivenState_WhenCallingGetHashCode_ThenReturnsIdentifierHash()
         {
-            foreach (ButtonState state in ButtonState.GetValues())
+            foreach (ButtonState buttonState in ButtonState.GetValues())
             {
-                Assert.That(state.GetHashCode(), Is.EqualTo(state.Id.GetHashCode()));
+                Assert.That(
+                    buttonState.GetHashCode(),
+                    Is.EqualTo(buttonState.Id.GetHashCode()));
             }
         }
 
         [Test]
-        public void GivenSameState_WhenCheckingEquality_ThenReturnsTrue()
+        public static void GivenSameState_WhenCheckingEquality_ThenReturnsTrue()
             => Assert.That(ButtonState.Idle.Equals(ButtonState.Idle));
 
         [Test]
-        public void GivenDifferentState_WhenCheckingEquality_ThenReturnsFalse()
+        public static void GivenDifferentState_WhenCheckingEquality_ThenReturnsFalse()
             => Assert.That(ButtonState.Idle.Equals(ButtonState.HeldDown), Is.False);
 
         [Test]
-        public void GivenSameStateAsObject_WhenCheckingEquality_ThenReturnsTrue()
+        public static void GivenSameStateAsObject_WhenCheckingEquality_ThenReturnsTrue()
             => Assert.That(ButtonState.Idle.Equals((object)ButtonState.Idle));
 
         [Test]
-        public void GivenDifferentStateAsObject_WhenCheckingEquality_ThenReturnsFalse()
+        public static void GivenDifferentStateAsObject_WhenCheckingEquality_ThenReturnsFalse()
             => Assert.That(ButtonState.Idle.Equals((object)ButtonState.HeldDown), Is.False);
 
         [Test]
-        public void GivenUnrelatedType_WhenCheckingEquality_ThenReturnsFalse()
-            => Assert.That(ButtonState.Idle.Equals(DateTime.Now), Is.False);
+        public static void GivenUnrelatedType_WhenCheckingEquality_ThenReturnsFalse()
+        {
+            object unrelatedValue = new();
+
+            Assert.That(ButtonState.Idle.Equals(unrelatedValue), Is.False);
+        }
 
         [Test]
-        public void GivenNull_WhenCheckingEquality_ThenReturnsFalse()
+        public static void GivenNull_WhenCheckingEquality_ThenReturnsFalse()
             => Assert.That(ButtonState.Idle.Equals(null), Is.False);
 
         [Test]
-        public void GivenSameState_WhenUsingEqualityOperator_ThenReturnsTrue()
+        public static void GivenSameState_WhenUsingEqualityOperator_ThenReturnsTrue()
             => Assert.That(ButtonState.Idle == ButtonState.Idle);
 
         [Test]
-        public void GivenNullLeftOperand_WhenUsingEqualityOperator_ThenReturnsFalse()
+        public static void GivenNullLeftOperand_WhenUsingEqualityOperator_ThenReturnsFalse()
             => Assert.That(null == ButtonState.Idle, Is.False);
 
         [Test]
-        public void GivenNullRightOperand_WhenUsingEqualityOperator_ThenReturnsFalse()
+        public static void GivenNullRightOperand_WhenUsingEqualityOperator_ThenReturnsFalse()
             => Assert.That(ButtonState.Idle == null, Is.False);
 
         [Test]
-        public void GivenState_WhenCastingToInteger_ThenReturnsItsIdentifier()
+        public static void GivenState_WhenCastingToInteger_ThenReturnsItsIdentifier()
         {
-            ButtonState state = ButtonState.Idle;
+            ButtonState buttonState = ButtonState.Idle;
 
-            Assert.That((int)state, Is.EqualTo(state.Id));
+            Assert.That((int)buttonState, Is.EqualTo(buttonState.Id));
         }
 
         [Test]
-        public void GivenState_WhenCastingToString_ThenReturnsItsName()
+        public static void GivenState_WhenCastingToString_ThenReturnsItsName()
         {
-            ButtonState state = ButtonState.Idle;
+            ButtonState buttonState = ButtonState.Idle;
 
-            Assert.That((string)state, Is.EqualTo(state.Name));
+            Assert.That((string)buttonState, Is.EqualTo(buttonState.Name));
         }
 
         [Test]
-        public void GivenExistingIdentifier_WhenAssigningToState_ThenReturnsTheState()
+        public static void GivenExistingIdentifier_WhenAssigningToState_ThenReturnsTheState()
         {
-            foreach (ButtonState state in ButtonState.GetValues())
+            foreach (ButtonState buttonState in ButtonState.GetValues())
             {
-                Assert.That((ButtonState)state.Id, Is.EqualTo(state));
+                Assert.That((ButtonState)buttonState.Id, Is.EqualTo(buttonState));
             }
         }
 
         [Test]
-        public void GivenInexistentIdentifier_WhenAssigningToState_ThenThrows()
+        public static void GivenInexistentIdentifier_WhenAssigningToState_ThenThrows()
         {
-            ButtonState state;
+            ButtonState buttonState;
 
-            Assert.Throws<ArgumentException>(() => state = 873);
+            Assert.Throws<ArgumentException>(() => buttonState = 873);
         }
 
         [Test]
-        public void GivenExistingName_WhenAssigningToState_ThenReturnsTheState()
+        public static void GivenExistingName_WhenAssigningToState_ThenReturnsTheState()
         {
-            foreach (ButtonState state in ButtonState.GetValues())
+            foreach (ButtonState buttonState in ButtonState.GetValues())
             {
-                Assert.That((ButtonState)state.Name, Is.EqualTo(state));
+                Assert.That((ButtonState)buttonState.Name, Is.EqualTo(buttonState));
             }
         }
 
         [Test]
-        public void GivenInexistentName_WhenAssigningToState_ThenThrows()
+        public static void GivenInexistentName_WhenAssigningToState_ThenThrows()
         {
-            ButtonState state;
+            ButtonState buttonState;
 
-            Assert.Throws<ArgumentException>(() => state = "Hori");
+            Assert.Throws<ArgumentException>(() => buttonState = "Testy McTestface");
         }
 
         [Test]
-        public void GivenTwoNullStates_WhenUsingEqualityOperator_ThenReturnsTrue()
+        public static void GivenTwoNullStates_WhenUsingEqualityOperator_ThenReturnsTrue()
             => Assert.That((ButtonState)null == (ButtonState)null);
 
         [Test]
-        public void GivenSameState_WhenUsingNotEqualsOperator_ThenReturnsFalse()
+        public static void GivenSameState_WhenUsingNotEqualsOperator_ThenReturnsFalse()
             => Assert.That(
                 ButtonState.Idle != ButtonState.Idle,
                 Is.False);
 
         [Test]
-        public void GivenDifferentButtonStates_WhenUsingNotEqualsOperator_ThenReturnsTrue()
+        public static void GivenDifferentStates_WhenUsingNotEqualsOperator_ThenReturnsTrue()
             => Assert.That(ButtonState.Idle != ButtonState.HeldDown);
 
         [Test]
-        public void GivenNullAndState_WhenUsingNotEqualsOperator_ThenReturnsTrue()
+        public static void GivenNullAndState_WhenUsingNotEqualsOperator_ThenReturnsTrue()
             => Assert.That(null != ButtonState.Idle);
 
         [Test]
-        public void GivenButtonState_WhenGetValuesIsCalled_ThenReturnsFourItems()
+        public static void GivenButtonState_WhenGetValuesIsCalled_ThenReturnsFourItems()
             => Assert.That(ButtonState.GetValues(), Has.Exactly(4).Items);
 
         [Test]
-        public void GivenButtonState_WhenGetValuesIsCalled_ThenContainsAllStates()
+        public static void GivenButtonState_WhenGetValuesIsCalled_ThenContainsAllStates()
         {
-            IEnumerable<ButtonState> values = ButtonState.GetValues();
+            IEnumerable<ButtonState> buttonStates = ButtonState.GetValues();
 
-            Assert.That(values, Contains.Item(ButtonState.Idle));
-            Assert.That(values, Contains.Item(ButtonState.Pressed));
-            Assert.That(values, Contains.Item(ButtonState.Released));
-            Assert.That(values, Contains.Item(ButtonState.HeldDown));
+            Assert.That(buttonStates, Contains.Item(ButtonState.Idle));
+            Assert.That(buttonStates, Contains.Item(ButtonState.Pressed));
+            Assert.That(buttonStates, Contains.Item(ButtonState.Released));
+            Assert.That(buttonStates, Contains.Item(ButtonState.HeldDown));
         }
     }
 }
