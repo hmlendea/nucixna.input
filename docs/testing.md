@@ -218,6 +218,8 @@ public class InputManagerTests
 
 Runs on `ubuntu-latest` with .NET 10.0.x. Installs `ttf-mscorefonts-installer` for MonoGame font rendering.
 
+A separate `.github/workflows/security.yml` workflow checks dependencies for known vulnerabilities and runs CodeQL analysis for C# on the same triggers, plus a weekly schedule.
+
 ---
 
 ## Test Design Principles

@@ -33,7 +33,11 @@ NuciXNA.Input.slnx
 │   ├── MouseEventArgsTests.cs
 │   ├── GamepadButtonEventArgsTests.cs
 │   └── NuciXNA.Input.UnitTests.csproj
-└── .github/workflows/dotnet.yml   # CI pipeline
+└── .github/workflows/            # CI, security, and release pipelines
+    ├── dotnet.yml                # Build and test
+    ├── security.yml              # Dependency and CodeQL scanning
+    ├── github-release.yml        # GitHub release packaging
+    └── nuget-release.yml         # NuGet.org publication
 ```
 
 ## Core Components
