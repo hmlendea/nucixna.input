@@ -1,12 +1,7 @@
-﻿using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Input;
 
 namespace NuciXNA.Input
 {
-    /// <summary>
-    /// Keyboard key event handler.
-    /// </summary>
-    public delegate void KeyboardKeyEventHandler(object sender, KeyboardKeyEventArgs e);
-
     /// <summary>
     /// Keyboard key event arguments.
     /// </summary>

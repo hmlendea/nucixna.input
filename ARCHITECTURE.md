@@ -243,12 +243,17 @@ The principal runtime sequence is:
 
 Paths:
 - `NuciXNA.Input/InputManager.cs`
+- `NuciXNA.Input/IInputManager.cs`
 - `NuciXNA.Input/ButtonState.cs`
 - `NuciXNA.Input/MouseButton.cs`
-- `NuciXNA.Input/KeyboardKeyEvent.cs`
-- `NuciXNA.Input/MouseButtonEvent.cs`
-- `NuciXNA.Input/MouseEvent.cs`
-- `NuciXNA.Input/GamepadButtonEvent.cs`
+- `NuciXNA.Input/KeyboardKeyEventArgs.cs`
+- `NuciXNA.Input/KeyboardKeyEventHandler.cs`
+- `NuciXNA.Input/MouseButtonEventArgs.cs`
+- `NuciXNA.Input/MouseButtonEventHandler.cs`
+- `NuciXNA.Input/MouseEventArgs.cs`
+- `NuciXNA.Input/MouseEventHandler.cs`
+- `NuciXNA.Input/GamepadButtonEventArgs.cs`
+- `NuciXNA.Input/GamepadButtonEventHandler.cs`
 
 Responsibilities:
 - All public API surface
@@ -262,6 +267,35 @@ Boundary rules:
 - No persistent state
 - All MonoGame access through static APIs
 - Single-threaded execution assumed (game thread)
+
+### Architecture Tests (`NuciXNA.Input.ArchitectureTests/`)
+
+Paths:
+- `NuciXNA.Input.ArchitectureTests/DependencyRuleTests.cs`
+- `NuciXNA.Input.ArchitectureTests/SourceFileConventionTests.cs`
+- `NuciXNA.Input.ArchitectureTests/FileNameConventionTests.cs`
+- `NuciXNA.Input.ArchitectureTests/MemberOrganisationTests.cs`
+- `NuciXNA.Input.ArchitectureTests/NamingConventionTests.cs`
+- `NuciXNA.Input.ArchitectureTests/TypeDeclarationConventionTests.cs`
+- `NuciXNA.Input.ArchitectureTests/IndentationConventionTests.cs`
+- `NuciXNA.Input.ArchitectureTests/LineLengthConventionTests.cs`
+- `NuciXNA.Input.ArchitectureTests/NamespaceConventionTests.cs`
+- `NuciXNA.Input.ArchitectureTests/DocumentationConventionTests.cs`
+- `NuciXNA.Input.ArchitectureTests/ErrorHandlingConventionTests.cs`
+- `NuciXNA.Input.ArchitectureTests/CodeStyleConventionTests.cs`
+- `NuciXNA.Input.ArchitectureTests/TestSourceConventionTests.cs`
+- `NuciXNA.Input.ArchitectureTests/ProjectConventionTests.cs`
+- `NuciXNA.Input.ArchitectureTests/SolutionConventionTests.cs`
+
+Responsibilities:
+- Enforce the documented dependency direction and boundary rules
+- Enforce the C# coding, naming, namespace, formatting, and file conventions
+- Enforce project and solution configuration conventions
+
+Boundary rules:
+- Uses NUnit 4 + ArchUnit.NET + Roslyn
+- Loads only the production assembly for dependency rules
+- Reads handwritten sources from embedded resources, never from the filesystem
 
 ### Unit Tests (`NuciXNA.Input.UnitTests/`)
 
@@ -446,8 +480,10 @@ NuciXNA.Input (library)
 | `MonoGame.Framework.DesktopGL` | 3.8.4 | `Keyboard`, `Mouse`, `GamePad`, `GameWindow`, `Keys`, `Buttons`, `PlayerIndex`, `ButtonState` (XNA) | Sole source of device state; abstracts OS input |
 | `NuciXNA.Primitives` | 2.1.7 | `Point2D` struct, mapping extensions | Coordinate representation and math |
 | `Microsoft.NET.Test.Sdk` | 18.7.0 | Test runner | Test infrastructure only |
+| `Microsoft.CodeAnalysis.CSharp` | 4.14.0 | Roslyn syntax analysis | Architecture test infrastructure only |
 | `NUnit` | 4.6.1 | Test framework | Test infrastructure only |
 | `NUnit3TestAdapter` | 6.2.0 | Test adapter | Test infrastructure only |
+| `TngTech.ArchUnitNET` | 0.13.5 | Compiled dependency rule engine | Architecture test infrastructure only |
 
 ## 🚀 Deployment and Operations
 
@@ -478,6 +514,7 @@ NuciXNA.Input (library)
 ## 🧪 Testing and Verification
 
 **Test Boundaries:**
+- Architecture tests enforce dependency boundaries and source conventions
 - Unit tests only (no integration tests)
 - Event args construction verified
 - Enum-like class contracts verified (factories, conversions, equality, `ToString`, `GetHashCode`)
@@ -488,8 +525,8 @@ NuciXNA.Input (library)
 
 **Executable Verification:**
 ```bash
-dotnet build NuciXNA.Input.sln
-dotnet test NuciXNA.Input.sln
+dotnet build NuciXNA.Input.slnx
+dotnet test NuciXNA.Input.slnx
 ```
 
 **CI Pipeline:** `.github/workflows/dotnet.yml` — Ubuntu latest, .NET 10.0.x, restore → build → test.
@@ -568,14 +605,19 @@ No plugin system, no interface-based substitution within library.
 
 | Area | Repository-Relative Paths |
 |------|---------------------------|
-| Solution | `NuciXNA.Input.sln` |
+| Solution | `NuciXNA.Input.slnx` |
 | Main Library | `NuciXNA.Input/` |
-|  ├─ InputManager | `NuciXNA.Input/InputManager.cs` |
+|  ├─ InputManager | `NuciXNA.Input/InputManager.cs`, `NuciXNA.Input/IInputManager.cs` |
 |  ├─ State Types | `NuciXNA.Input/ButtonState.cs`, `NuciXNA.Input/MouseButton.cs` |
-|  ├─ Keyboard Events | `NuciXNA.Input/KeyboardKeyEvent.cs` |
-|  ├─ Mouse Events | `NuciXNA.Input/MouseButtonEvent.cs`, `NuciXNA.Input/MouseEvent.cs` |
-|  ├─ Gamepad Events | `NuciXNA.Input/GamepadButtonEvent.cs` |
+|  ├─ Keyboard Events | `NuciXNA.Input/KeyboardKeyEventArgs.cs`, `NuciXNA.Input/KeyboardKeyEventHandler.cs` |
+|  ├─ Mouse Events | `NuciXNA.Input/MouseButtonEventArgs.cs`, `NuciXNA.Input/MouseButtonEventHandler.cs`, `NuciXNA.Input/MouseEventArgs.cs`, `NuciXNA.Input/MouseEventHandler.cs` |
+|  ├─ Gamepad Events | `NuciXNA.Input/GamepadButtonEventArgs.cs`, `NuciXNA.Input/GamepadButtonEventHandler.cs` |
 |  ├─ Project Config | `NuciXNA.Input/NuciXNA.Input.csproj` |
+| Architecture Tests | `NuciXNA.Input.ArchitectureTests/` |
+|  ├─ Dependency Rules | `NuciXNA.Input.ArchitectureTests/DependencyRuleTests.cs` |
+|  ├─ Source Conventions | `NuciXNA.Input.ArchitectureTests/SourceFileConventionTests.cs`, `NuciXNA.Input.ArchitectureTests/FileNameConventionTests.cs`, `NuciXNA.Input.ArchitectureTests/MemberOrganisationTests.cs`, `NuciXNA.Input.ArchitectureTests/NamingConventionTests.cs`, `NuciXNA.Input.ArchitectureTests/TypeDeclarationConventionTests.cs`, `NuciXNA.Input.ArchitectureTests/IndentationConventionTests.cs`, `NuciXNA.Input.ArchitectureTests/LineLengthConventionTests.cs`, `NuciXNA.Input.ArchitectureTests/NamespaceConventionTests.cs`, `NuciXNA.Input.ArchitectureTests/DocumentationConventionTests.cs`, `NuciXNA.Input.ArchitectureTests/ErrorHandlingConventionTests.cs`, `NuciXNA.Input.ArchitectureTests/CodeStyleConventionTests.cs`, `NuciXNA.Input.ArchitectureTests/TestSourceConventionTests.cs` |
+|  ├─ Project Conventions | `NuciXNA.Input.ArchitectureTests/ProjectConventionTests.cs`, `NuciXNA.Input.ArchitectureTests/SolutionConventionTests.cs` |
+|  ├─ Project Config | `NuciXNA.Input.ArchitectureTests/NuciXNA.Input.ArchitectureTests.csproj` |
 | Unit Tests | `NuciXNA.Input.UnitTests/` |
 |  ├─ State Type Tests | `NuciXNA.Input.UnitTests/ButtonStateTests.cs`, `NuciXNA.Input.UnitTests/MouseButtonTests.cs` |
 |  ├─ Event Args Tests | `NuciXNA.Input.UnitTests/KeyboardKeyEventArgsTests.cs`, `NuciXNA.Input.UnitTests/MouseButtonEventArgsTests.cs`, `NuciXNA.Input.UnitTests/MouseEventArgsTests.cs`, `NuciXNA.Input.UnitTests/GamepadButtonEventArgsTests.cs` |

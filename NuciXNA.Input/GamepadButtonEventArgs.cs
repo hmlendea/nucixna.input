@@ -4,11 +4,6 @@ using Microsoft.Xna.Framework.Input;
 namespace NuciXNA.Input
 {
     /// <summary>
-    /// Gamepad button event handler.
-    /// </summary>
-    public delegate void GamepadButtonEventHandler(object sender, GamepadButtonEventArgs e);
-
-    /// <summary>
     /// Gamepad button event arguments.
     /// </summary>
     /// <param name="button">Button.</param>

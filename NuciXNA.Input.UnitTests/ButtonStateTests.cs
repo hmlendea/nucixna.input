@@ -1,13 +1,15 @@
 using System;
+using System.Collections.Generic;
 
 using NUnit.Framework;
 
 namespace NuciXNA.Input.UnitTests
 {
-    public class ButtonStateTests
+    [TestFixture]
+    public sealed class ButtonStateTests
     {
         [Test]
-        public void IsDown_ValueIsCorrect()
+        public void GivenStateValues_WhenCheckingIsDown_ThenOnlyPressedAndHeldDownAreDown()
         {
             Assert.That(ButtonState.Idle.IsDown, Is.False);
             Assert.That(ButtonState.Pressed.IsDown);
@@ -16,7 +18,7 @@ namespace NuciXNA.Input.UnitTests
         }
 
         [Test]
-        public void FromId_CalledWithExistingId_ReturnsCorrectButtonState()
+        public void GivenExistingIdentifier_WhenCallingFromId_ThenReturnsTheMatchingState()
         {
             foreach (ButtonState state in ButtonState.GetValues())
             {
@@ -25,11 +27,11 @@ namespace NuciXNA.Input.UnitTests
         }
 
         [Test]
-        public void FromId_CalledWithInexistentId_ThrowsArgumentException()
+        public void GivenInexistentIdentifier_WhenCallingFromId_ThenThrowsArgumentException()
             => Assert.Throws<ArgumentException>(() => ButtonState.FromId(873));
 
         [Test]
-        public void FromName_CalledWithExistingName_ReturnsCorrectButtonState()
+        public void GivenExistingName_WhenCallingFromName_ThenReturnsTheMatchingState()
         {
             foreach (ButtonState state in ButtonState.GetValues())
             {
@@ -38,11 +40,11 @@ namespace NuciXNA.Input.UnitTests
         }
 
         [Test]
-        public void FromName_CalledWithInexistentName_ThrowsArgumentException()
+        public void GivenInexistentName_WhenCallingFromName_ThenThrowsArgumentException()
             => Assert.Throws<ArgumentException>(() => ButtonState.FromName("Hori"));
 
         [Test]
-        public void ToString_ReturnsCorrectValue()
+        public void GivenState_WhenCallingToString_ThenReturnsItsName()
         {
             foreach (ButtonState state in ButtonState.GetValues())
             {
@@ -51,7 +53,7 @@ namespace NuciXNA.Input.UnitTests
         }
 
         [Test]
-        public void GetHashCode_ReturnsCorrectValue()
+        public void GivenState_WhenCallingGetHashCode_ThenReturnsIdentifierHash()
         {
             foreach (ButtonState state in ButtonState.GetValues())
             {
@@ -60,43 +62,43 @@ namespace NuciXNA.Input.UnitTests
         }
 
         [Test]
-        public void Equals_CalledWithSameButtonState_ReturnsTrue()
+        public void GivenSameState_WhenCheckingEquality_ThenReturnsTrue()
             => Assert.That(ButtonState.Idle.Equals(ButtonState.Idle));
 
         [Test]
-        public void Equals_CalledWithOtherButtonState_ReturnsFalse()
+        public void GivenDifferentState_WhenCheckingEquality_ThenReturnsFalse()
             => Assert.That(ButtonState.Idle.Equals(ButtonState.HeldDown), Is.False);
 
         [Test]
-        public void Equals_CalledWithSameButtonStateAsObject_ReturnsTrue()
+        public void GivenSameStateAsObject_WhenCheckingEquality_ThenReturnsTrue()
             => Assert.That(ButtonState.Idle.Equals((object)ButtonState.Idle));
 
         [Test]
-        public void Equals_CalledWithOtherButtonStateAsObject_ReturnsFalse()
+        public void GivenDifferentStateAsObject_WhenCheckingEquality_ThenReturnsFalse()
             => Assert.That(ButtonState.Idle.Equals((object)ButtonState.HeldDown), Is.False);
 
         [Test]
-        public void Equals_CalledWithOtherType_ReturnsFalse()
+        public void GivenUnrelatedType_WhenCheckingEquality_ThenReturnsFalse()
             => Assert.That(ButtonState.Idle.Equals(DateTime.Now), Is.False);
 
         [Test]
-        public void Equals_CalledWithNull_ReturnsFalse()
+        public void GivenNull_WhenCheckingEquality_ThenReturnsFalse()
             => Assert.That(ButtonState.Idle.Equals(null), Is.False);
 
         [Test]
-        public void EqualsOperator_OtherIsSameButtonState_ReturnsTrue()
+        public void GivenSameState_WhenUsingEqualityOperator_ThenReturnsTrue()
             => Assert.That(ButtonState.Idle == ButtonState.Idle);
 
         [Test]
-        public void EqualsOperator_CurrentIsNull_ReturnsFalse()
+        public void GivenNullLeftOperand_WhenUsingEqualityOperator_ThenReturnsFalse()
             => Assert.That(null == ButtonState.Idle, Is.False);
 
         [Test]
-        public void EqualsOperator_OtherIsNull_ReturnsFalse()
+        public void GivenNullRightOperand_WhenUsingEqualityOperator_ThenReturnsFalse()
             => Assert.That(ButtonState.Idle == null, Is.False);
 
         [Test]
-        public void CastAsInt_ReturnsCorrectValue()
+        public void GivenState_WhenCastingToInteger_ThenReturnsItsIdentifier()
         {
             ButtonState state = ButtonState.Idle;
 
@@ -104,7 +106,7 @@ namespace NuciXNA.Input.UnitTests
         }
 
         [Test]
-        public void CastAsString_ReturnsCorrectValue()
+        public void GivenState_WhenCastingToString_ThenReturnsItsName()
         {
             ButtonState state = ButtonState.Idle;
 
@@ -112,7 +114,7 @@ namespace NuciXNA.Input.UnitTests
         }
 
         [Test]
-        public void AssignInteger_AssignedExistingId_ReturnsCorrectButtonState()
+        public void GivenExistingIdentifier_WhenAssigningToState_ThenReturnsTheState()
         {
             foreach (ButtonState state in ButtonState.GetValues())
             {
@@ -121,7 +123,7 @@ namespace NuciXNA.Input.UnitTests
         }
 
         [Test]
-        public void AssignInteger_AssignedInexistentId_ThrowsArgumentException()
+        public void GivenInexistentIdentifier_WhenAssigningToState_ThenThrows()
         {
             ButtonState state;
 
@@ -129,7 +131,7 @@ namespace NuciXNA.Input.UnitTests
         }
 
         [Test]
-        public void AssignString_AssignedExistingName_ReturnsCorrectButtonState()
+        public void GivenExistingName_WhenAssigningToState_ThenReturnsTheState()
         {
             foreach (ButtonState state in ButtonState.GetValues())
             {
@@ -138,7 +140,7 @@ namespace NuciXNA.Input.UnitTests
         }
 
         [Test]
-        public void AssignString_AssignedInexistentName_ThrowsArgumentException()
+        public void GivenInexistentName_WhenAssigningToState_ThenThrows()
         {
             ButtonState state;
 
@@ -146,19 +148,21 @@ namespace NuciXNA.Input.UnitTests
         }
 
         [Test]
-        public void GivenTwoNullButtonStates_WhenComparedWithEqualsOperator_ThenReturnsTrue()
+        public void GivenTwoNullStates_WhenUsingEqualityOperator_ThenReturnsTrue()
             => Assert.That((ButtonState)null == (ButtonState)null);
 
         [Test]
-        public void GivenSameButtonState_WhenComparedWithNotEqualsOperator_ThenReturnsFalse()
-            => Assert.That(ButtonState.Idle != ButtonState.Idle, Is.False);
+        public void GivenSameState_WhenUsingNotEqualsOperator_ThenReturnsFalse()
+            => Assert.That(
+                ButtonState.Idle != ButtonState.Idle,
+                Is.False);
 
         [Test]
-        public void GivenDifferentButtonStates_WhenComparedWithNotEqualsOperator_ThenReturnsTrue()
+        public void GivenDifferentButtonStates_WhenUsingNotEqualsOperator_ThenReturnsTrue()
             => Assert.That(ButtonState.Idle != ButtonState.HeldDown);
 
         [Test]
-        public void GivenNullAndNonNullButtonState_WhenComparedWithNotEqualsOperator_ThenReturnsTrue()
+        public void GivenNullAndState_WhenUsingNotEqualsOperator_ThenReturnsTrue()
             => Assert.That(null != ButtonState.Idle);
 
         [Test]
@@ -168,7 +172,7 @@ namespace NuciXNA.Input.UnitTests
         [Test]
         public void GivenButtonState_WhenGetValuesIsCalled_ThenContainsAllStates()
         {
-            var values = ButtonState.GetValues();
+            IEnumerable<ButtonState> values = ButtonState.GetValues();
 
             Assert.That(values, Contains.Item(ButtonState.Idle));
             Assert.That(values, Contains.Item(ButtonState.Pressed));
