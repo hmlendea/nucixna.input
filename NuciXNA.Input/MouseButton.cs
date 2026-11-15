@@ -70,14 +70,14 @@ namespace NuciXNA.Input
         /// <returns>The matching mouse button.</returns>
         public static MouseButton FromId(int id)
         {
-            if (!entries.TryGetValue(id, out MouseButton value))
+            if (!entries.TryGetValue(id, out MouseButton? matchingButton))
             {
                 throw new ArgumentException(
                     $"A {nameof(MouseButton)} with the identifier \"{id}\" " +
                     "does not exist");
             }
 
-            return value;
+            return matchingButton;
         }
 
         /// <summary>
@@ -87,11 +87,11 @@ namespace NuciXNA.Input
         /// <returns>The matching mouse button.</returns>
         public static MouseButton FromName(string name)
         {
-            foreach (MouseButton button in cachedValues)
+            foreach (MouseButton mouseButton in cachedValues)
             {
-                if (string.Equals(button.Name, name))
+                if (string.Equals(mouseButton.Name, name))
                 {
-                    return button;
+                    return mouseButton;
                 }
             }
 
@@ -130,7 +130,7 @@ namespace NuciXNA.Input
                 return false;
             }
 
-            return object.Equals(other.Id, Id);
+            return int.Equals(other.Id, Id);
         }
 
         /// <summary>

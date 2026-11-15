@@ -22,8 +22,8 @@ MouseState previousMouseState;
 
 ### Gamepad (4 players)
 ```csharp
-GamePadState[] currentGamepadStates = new GamePadState[4];
-GamePadState[] previousGamepadStates = new GamePadState[4];
+GamePadState[] currentGamepadStates = new GamePadState[allPlayerIndices.Length];
+GamePadState[] previousGamepadStates = new GamePadState[allPlayerIndices.Length];
 ```
 
 ---
@@ -34,30 +34,26 @@ GamePadState[] previousGamepadStates = new GamePadState[4];
 public void Update(GameWindow window)
 {
     // 1. Swap previous ↔ current (no allocation)
-    previousKeyState = currentKeyState;
-    previousMouseState = currentMouseState;
-    var swapTemp = previousGamepadStates;
-    previousGamepadStates = currentGamepadStates;
-    currentGamepadStates = swapTemp;
+    SwapStateBuffers();
 
     // 2. Capture new current state
     currentKeyState = Keyboard.GetState();
     currentMouseState = Mouse.GetState();
-    for (int i = 0; i < 4; i++)
-        currentGamepadStates[i] = GamePad.GetState((PlayerIndex)i);
+    foreach (PlayerIndex playerIndex in allPlayerIndices)
+    {
+        currentGamepadStates[(int)playerIndex] = GamePad.GetState(playerIndex);
+    }
 
     // 3. Linux coordinate fix
-    if (currentMouseState.X < 0)
-        currentMouseState = new MouseState(
-            currentMouseState.X + window.ClientBounds.X,
-            currentMouseState.Y + window.ClientBounds.Y,
-            ...);
+    CorrectMouseCoordinates(window);
 
     // 4. Derive transitions & fire events
     CheckGamepadButtonStates();
     CheckKeyboardKeyStates();
     CheckMouseButtonStates();
     CheckMouseMoved();
+}
+```
 }
 ```
 
@@ -124,16 +120,19 @@ Point2D cursorLocation = currentMouseState.Position.ToPoint2D();
 
 foreach (MouseButton button in MouseButton.GetValues())
 {
-    ButtonState state = GetMouseButtonState(button);
-    var args = new MouseButtonEventArgs(button, state, cursorLocation);
+    ButtonState buttonState = GetMouseButtonState(button);
+    MouseButtonEventArgs eventArgs = new(
+        button,
+        buttonState,
+        cursorLocation);
 
-    if (state == ButtonState.Pressed) OnMouseButtonPressed(args);
-    else if (state == ButtonState.Released) OnMouseButtonReleased(args);
-    else if (state == ButtonState.HeldDown) OnMouseButtonHeldDown(args);
+    if (ButtonState.Equals(buttonState, ButtonState.Pressed)) OnMouseButtonPressed(eventArgs);
+    else if (ButtonState.Equals(buttonState, ButtonState.Released)) OnMouseButtonReleased(eventArgs);
+    else if (ButtonState.Equals(buttonState, ButtonState.HeldDown)) OnMouseButtonHeldDown(eventArgs);
 }
 ```
 
-**GetMouseButtonState** maps `MouseButton` enum to `MouseState` fields:
+**GetMouseButtonState** maps `MouseButton` enum to `MouseState` fields via the `GetButtonState` helper:
 
 | MouseButton | MouseState Field |
 |-------------|------------------|
@@ -148,7 +147,7 @@ Then compares current vs previous `XNAButtonState` (Pressed/Released).
 ### Mouse Move (CheckMouseMoved)
 
 ```csharp
-if (!currentMouseState.Position.Equals(previousMouseState.Position))
+if (!object.Equals(currentMouseState.Position, previousMouseState.Position))
     OnMouseMoved(new MouseEventArgs(
         currentMouseState.Position.ToPoint2D(),
         previousMouseState.Position.ToPoint2D()));
@@ -172,15 +171,11 @@ if (!currentMouseState.Position.Equals(previousMouseState.Position))
 ```csharp
 public void ResetInputStates()
 {
-    previousKeyState = currentKeyState;
-    previousMouseState = currentMouseState;
-    var swapTemp = previousGamepadStates;
-    previousGamepadStates = currentGamepadStates;
-    currentGamepadStates = swapTemp;
+    SwapStateBuffers();
 
     currentKeyState = new KeyboardState();      // All keys up
     currentMouseState = new MouseState();       // All buttons up, pos (0,0)
-    Array.Clear(currentGamepadStates, 0, 4);    // All buttons up
+    Array.Clear(currentGamepadStates);          // All buttons up
 }
 ```
 
@@ -204,10 +199,10 @@ public bool IsAnyKeyDown(IEnumerable<Keys> keys)
 ### Mouse
 ```csharp
 public bool IsMouseButtonDown(params MouseButton[] buttons)
-    => buttons.Select(GetMouseButtonState).All(x => x.IsDown);
+    => buttons.All(button => GetMouseButtonState(button).IsDown);
 
 public bool IsAnyMouseButtonDown(IEnumerable<MouseButton> buttons)
-    => buttons.Select(GetMouseButtonState).Any(x => x.IsDown);
+    => buttons.Any(button => GetMouseButtonState(button).IsDown);
 ```
 
 **Uses `ButtonState.IsDown`** — true for Pressed and HeldDown.
@@ -215,10 +210,10 @@ public bool IsAnyMouseButtonDown(IEnumerable<MouseButton> buttons)
 ### Gamepad
 ```csharp
 public bool IsGamepadButtonDown(PlayerIndex playerIndex, params Buttons[] buttons)
-    => buttons.All(b => currentGamepadStates[(int)playerIndex].IsButtonDown(b));
+    => buttons.All(GetGamepadState(playerIndex).IsButtonDown);
 
 public bool IsAnyGamepadButtonDown(PlayerIndex playerIndex, IEnumerable<Buttons> buttons)
-    => buttons.Any(b => currentGamepadStates[(int)playerIndex].IsButtonDown(b));
+    => buttons.Any(GetGamepadState(playerIndex).IsButtonDown);
 ```
 
 ---
@@ -245,20 +240,22 @@ On Linux with SDL2, when window is on a monitor **left of primary**:
 
 ### Fix
 ```csharp
-int rawX = currentMouseState.X;
-int rawY = currentMouseState.Y;
-
-if (rawX < 0)
+private void CorrectMouseCoordinates(GameWindow window)
 {
-    currentMouseState = new MouseState(
-        rawX + window.ClientBounds.X,
-        rawY + window.ClientBounds.Y,
-        currentMouseState.ScrollWheelValue,
-        currentMouseState.LeftButton,
-        currentMouseState.MiddleButton,
-        currentMouseState.RightButton,
-        currentMouseState.XButton1,
-        currentMouseState.XButton2);
+    int virtualDesktopX = currentMouseState.X;
+
+    if (virtualDesktopX < 0)
+    {
+        currentMouseState = new MouseState(
+            virtualDesktopX + window.ClientBounds.X,
+            currentMouseState.Y + window.ClientBounds.Y,
+            currentMouseState.ScrollWheelValue,
+            currentMouseState.LeftButton,
+            currentMouseState.MiddleButton,
+            currentMouseState.RightButton,
+            currentMouseState.XButton1,
+            currentMouseState.XButton2);
+    }
 }
 ```
 

@@ -200,7 +200,7 @@ sequenceDiagram
     IM->>MG: Mouse.GetState()
     IM->>MG: GamePad.GetState() x4
     alt Linux/SDL2 multi-monitor fix
-        IM->>IM: Correct mouse coordinates if rawX < 0
+        IM->>IM: Correct mouse coordinates if virtualDesktopX < 0
     end
     IM->>IM: CheckGamepadButtonStates()
     IM->>Handlers: GamepadButtonPressed/Released/HeldDown
@@ -368,7 +368,7 @@ flowchart TD
     C --> D[Capture KeyboardState]
     C --> E[Capture MouseState]
     C --> F[Capture GamePadState x4]
-    E --> G{rawX < 0?}
+    E --> G{virtualDesktopX < 0?}
     G -->|Yes| H[Correct Coordinates]
     G -->|No| I[Use Raw]
     H --> J[CheckGamepadButtonStates]
@@ -436,8 +436,8 @@ flowchart TD
 
 ### Configuration
 - No configuration API
-- Linux coordinate fix is automatic (triggered by `rawX < 0`)
-- Workaround fields (`MouseButtonInputHandled`, `IsLeftMouseButtonClicked`) are public but marked TODO for removal
+- Linux coordinate fix is automatic (triggered when `virtualDesktopX < 0`)
+- Workaround fields (`MouseButtonInputHandled`, `IsLeftMouseButtonClicked`) are public but kept for backwards compatibility
 
 ### Observability
 - No logging, metrics, or tracing
@@ -508,7 +508,7 @@ NuciXNA.Input (library)
 | Public API surface (`InputManager`, event args, `ButtonState`, `MouseButton`) | Library | Method signatures, event delegate types, enum-like class members stable | Compile-time; NuGet package validation | Semantic versioning; breaking changes require major version |
 | Event firing order (gamepad → keyboard → mouse buttons → mouse move) | Library | Order preserved per `Update()` call | Not automatically verified | Considered implementation detail; may change in minor version |
 | `ButtonState`/`MouseButton` implicit conversions (`int`, `string`) | Library | Conversion behavior preserved | Unit tests | Stable; part of public contract |
-| Linux coordinate fix behavior | Library | Applied when `rawX < 0` | Not automatically verified | May be refined in patch version |
+| Linux coordinate fix behavior | Library | Applied when `virtualDesktopX < 0` | Not automatically verified | May be refined in patch version |
 | Target framework (`net10.0`) | Library | Compiles and runs on .NET 10.0 | CI build | Updated with .NET LTS/releases |
 
 ## 🧪 Testing and Verification
@@ -599,8 +599,8 @@ No plugin system, no interface-based substitution within library.
 | Dual-buffer swap (no allocation) | Avoid GC pressure at 60fps | `Update()` swaps array references |
 | Enum-like classes (`ButtonState`, `MouseButton`) | Type safety, implicit conversions, extensibility | `ButtonState.cs`, `MouseButton.cs` with `implicit operator` |
 | Synchronous multicast events | Low latency, simple mental model | `event` fields in `InputManager` |
-| Linux coordinate fix in `Update()` | Transparent to consumers | `InputManager.cs` lines 65-75 |
-| Workaround fields public but TODO | Temporary fix for upstream issue | `InputManager.cs` lines 430-434 |
+| Linux coordinate fix in `Update()` | Transparent to consumers | `CorrectMouseCoordinates` in `InputManager.cs` |
+| Workaround fields public for compatibility | Temporary fix for upstream issue | `MouseLocation`, `MouseButtonInputHandled`, `IsLeftMouseButtonClicked` in `InputManager.cs` |
 | No analog gamepad | Scope limitation; digital buttons sufficient for many games | `CheckGamepadButtonStates()` only iterates `Buttons` enum |
 
 ## 🗺️ Source Map

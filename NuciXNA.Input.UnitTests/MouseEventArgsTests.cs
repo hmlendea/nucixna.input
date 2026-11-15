@@ -1,28 +1,28 @@
 using NuciXNA.Primitives;
+
 using NUnit.Framework;
 
 namespace NuciXNA.Input.UnitTests
 {
     [TestFixture]
-
     public sealed class MouseEventArgsTests
     {
         [Test]
-        public void GivenMouseEventArgs_WhenCreated_ThenLocationIsSetCorrectly()
+        public static void GivenMouseEventArgs_WhenCreated_ThenLocationIsSetCorrectly()
         {
-            Point2D location = new(15, 30);
-            MouseEventArgs args = new(location, new Point2D(0, 0));
+            Point2D location = new(96, 128);
+            MouseEventArgs eventArgs = new(location, new Point2D(8, 16));
 
-            Assert.That(args.Location, Is.EqualTo(location));
+            Assert.That(eventArgs.Location, Is.EqualTo(location));
         }
 
         [Test]
-        public void GivenMouseEventArgs_WhenCreated_ThenPreviousLocationIsSetCorrectly()
+        public static void GivenMouseEventArgs_WhenCreated_ThenPreviousLocationIsSetCorrectly()
         {
-            Point2D previousLocation = new(5, 10);
-            MouseEventArgs args = new(new Point2D(15, 30), previousLocation);
+            Point2D previousLocation = new(32, 48);
+            MouseEventArgs eventArgs = new(new Point2D(256, 512), previousLocation);
 
-            Assert.That(args.PreviousLocation, Is.EqualTo(previousLocation));
+            Assert.That(eventArgs.PreviousLocation, Is.EqualTo(previousLocation));
         }
     }
 }

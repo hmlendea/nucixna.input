@@ -38,7 +38,7 @@ public sealed class InputManager
 
     // Properties
     public Point2D MouseLocation { get; }
-    public bool MouseButtonInputHandled { get; set; } // TODO: remove
+    public bool MouseButtonInputHandled { get; set; }
 
     // Helpers
     public bool IsLeftMouseButtonClicked();

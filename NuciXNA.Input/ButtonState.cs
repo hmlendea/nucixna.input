@@ -9,22 +9,22 @@ namespace NuciXNA.Input
     public sealed class ButtonState : IEquatable<ButtonState>
     {
         /// <summary>
-        /// The mouse button is up.
+        /// The button is up.
         /// </summary>
         public static readonly ButtonState Idle = new(0, nameof(Idle), false);
 
         /// <summary>
-        /// The mouse button was just pressed.
+        /// The button was just pressed.
         /// </summary>
         public static readonly ButtonState Pressed = new(1, nameof(Pressed), true);
 
         /// <summary>
-        /// The mouse button was just released.
+        /// The button was just released.
         /// </summary>
         public static readonly ButtonState Released = new(2, nameof(Released), false);
 
         /// <summary>
-        /// The mouse button is down.
+        /// The button is held down.
         /// </summary>
         public static readonly ButtonState HeldDown = new(3, nameof(HeldDown), true);
 
@@ -71,14 +71,14 @@ namespace NuciXNA.Input
         /// <returns>The matching state.</returns>
         public static ButtonState FromId(int id)
         {
-            if (!entries.TryGetValue(id, out ButtonState value))
+            if (!entries.TryGetValue(id, out ButtonState? matchingState))
             {
                 throw new ArgumentException(
                     $"A {nameof(ButtonState)} with the identifier \"{id}\" " +
                     "does not exist");
             }
 
-            return value;
+            return matchingState;
         }
 
         /// <summary>
@@ -88,11 +88,11 @@ namespace NuciXNA.Input
         /// <returns>The matching state.</returns>
         public static ButtonState FromName(string name)
         {
-            foreach (ButtonState state in cachedValues)
+            foreach (ButtonState buttonState in cachedValues)
             {
-                if (state.Name.Equals(name))
+                if (string.Equals(buttonState.Name, name))
                 {
-                    return state;
+                    return buttonState;
                 }
             }
 
@@ -131,7 +131,7 @@ namespace NuciXNA.Input
                 return false;
             }
 
-            return other.Id.Equals(Id);
+            return int.Equals(other.Id, Id);
         }
 
         /// <summary>

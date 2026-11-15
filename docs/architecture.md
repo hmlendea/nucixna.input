@@ -68,7 +68,7 @@ NuciXNA.Input.slnx
 | `IsGamepadButtonDown(PlayerIndex, Buttons[])` | method | All specified gamepad buttons down |
 | `IsAnyGamepadButtonDown(PlayerIndex, Buttons[])` | method | Any specified gamepad button down |
 | `MouseLocation` | property | Current mouse position (Point2D) |
-| `MouseButtonInputHandled` | property | Workaround flag (TODO: remove) |
+| `MouseButtonInputHandled` | property | Backwards-compatible workaround flag |
 | `IsLeftMouseButtonClicked()` | method | Left button pressed this frame |
 
 **Events:**
@@ -99,7 +99,7 @@ Update(window)
 ├── Keyboard.GetState() → currentKeyState
 ├── Mouse.GetState() → currentMouseState
 ├── GamePad.GetState() for each PlayerIndex → currentGamepadStates
-├── Linux coordinate fix (if rawX < 0)
+├── Linux coordinate fix (if virtualDesktopX < 0)
 ├── CheckGamepadButtonStates()
 ├── CheckKeyboardKeyStates()
 ├── CheckMouseButtonStates()
@@ -189,12 +189,11 @@ In `Update()`, when `Mouse.GetState().X < 0`, the code assumes the window is on 
 
 **Limitation:** Only corrects X < 0 case; Y correction applied unconditionally in same block.
 
-## Known Issues / TODOs
+## Known Issues / Compatibility Notes
 
-1. **Workaround fields** (lines 430-434 in InputManager.cs):
+1. **Workaround fields** (retained for backwards compatibility):
    - `MouseButtonInputHandled` — external flag to suppress processing
    - `IsLeftMouseButtonClicked()` — duplicate of `GetMouseButtonState(Left) == Pressed`
-   - Marked `TODO: remove as soon as properly fixed`
 
 2. **No gamepad axis/trigger support** — only digital buttons
 

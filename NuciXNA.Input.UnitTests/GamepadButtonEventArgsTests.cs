@@ -1,35 +1,44 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+
 using NUnit.Framework;
 
 namespace NuciXNA.Input.UnitTests
 {
     [TestFixture]
-
     public sealed class GamepadButtonEventArgsTests
     {
         [Test]
-        public void GivenGamepadButtonEventArgs_WhenCreated_ThenButtonIsSetCorrectly()
+        public static void GivenGamepadButtonEventArgs_WhenCreated_ThenButtonIsSetCorrectly()
         {
-            GamepadButtonEventArgs args = new(Buttons.A, ButtonState.Pressed, PlayerIndex.One);
+            GamepadButtonEventArgs eventArgs = new(
+                Buttons.A,
+                ButtonState.Pressed,
+                PlayerIndex.One);
 
-            Assert.That(args.Button, Is.EqualTo(Buttons.A));
+            Assert.That(eventArgs.Button, Is.EqualTo(Buttons.A));
         }
 
         [Test]
-        public void GivenGamepadButtonEventArgs_WhenCreated_ThenButtonStateIsSetCorrectly()
+        public static void GivenGamepadButtonEventArgs_WhenCreated_ThenButtonStateIsCorrect()
         {
-            GamepadButtonEventArgs args = new(Buttons.B, ButtonState.HeldDown, PlayerIndex.One);
+            GamepadButtonEventArgs eventArgs = new(
+                Buttons.B,
+                ButtonState.HeldDown,
+                PlayerIndex.One);
 
-            Assert.That(args.ButtonState, Is.EqualTo(ButtonState.HeldDown));
+            Assert.That(eventArgs.ButtonState, Is.EqualTo(ButtonState.HeldDown));
         }
 
         [Test]
-        public void GivenGamepadButtonEventArgs_WhenCreated_ThenPlayerIndexIsSetCorrectly()
+        public static void GivenGamepadButtonEventArgs_WhenCreated_ThenPlayerIndexIsCorrect()
         {
-            GamepadButtonEventArgs args = new(Buttons.X, ButtonState.Released, PlayerIndex.Two);
+            GamepadButtonEventArgs eventArgs = new(
+                Buttons.X,
+                ButtonState.Released,
+                PlayerIndex.Two);
 
-            Assert.That(args.PlayerIndex, Is.EqualTo(PlayerIndex.Two));
+            Assert.That(eventArgs.PlayerIndex, Is.EqualTo(PlayerIndex.Two));
         }
     }
 }

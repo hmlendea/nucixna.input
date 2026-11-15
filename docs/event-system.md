@@ -238,6 +238,6 @@ Within a single `Update()` call:
 
 ## Linux Coordinate Fix Impact
 
-Mouse events (`MouseButtonEventArgs.Location`, `MouseEventArgs.Location/PreviousLocation`) use **corrected client-relative coordinates** when `rawX < 0`.
+Mouse events (`MouseButtonEventArgs.Location`, `MouseEventArgs.Location/PreviousLocation`) use **corrected client-relative coordinates** when `virtualDesktopX < 0`.
 
 The fix runs **before** event firing, so all mouse events receive corrected positions.

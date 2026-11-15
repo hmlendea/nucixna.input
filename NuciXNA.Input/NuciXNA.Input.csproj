@@ -7,7 +7,7 @@
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <IsPackable>true</IsPackable>
-    <Version>2.1.2</Version>
+    <Version>2.1.3</Version>
     <Description>Input management for NuciXNA</Description>
     <Authors>Horațiu Mlendea</Authors>
     <Copyright>Copyright 2026 © Horațiu Mlendea</Copyright>
