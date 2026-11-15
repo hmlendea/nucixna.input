@@ -4,7 +4,9 @@ using NUnit.Framework;
 
 namespace NuciXNA.Input.UnitTests
 {
-    public class GamepadButtonEventArgsTests
+    [TestFixture]
+
+    public sealed class GamepadButtonEventArgsTests
     {
         [Test]
         public void GivenGamepadButtonEventArgs_WhenCreated_ThenButtonIsSetCorrectly()

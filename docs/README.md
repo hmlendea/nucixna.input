@@ -51,16 +51,19 @@ NuciXNA.Input is a lightweight input management library for MonoGame/XNA providi
 
 ## Repository Structure
 ```
-NuciXNA.Input.sln
+NuciXNA.Input.slnx
 ├── NuciXNA.Input/              # Main library
 │   ├── InputManager.cs         # Singleton input manager
 │   ├── ButtonState.cs          # Frame-state enum
-│   ├── KeyboardKeyEvent.cs     # Keyboard events
+│   ├── KeyboardKeyEvent*.cs    # Keyboard events
 │   ├── MouseButton.cs          # Mouse button enum
-│   ├── MouseButtonEvent.cs     # Mouse button events
-│   ├── MouseEvent.cs           # Mouse move events
-│   ├── GamepadButtonEvent.cs   # Gamepad events
+│   ├── MouseButtonEvent*.cs    # Mouse button events
+│   ├── MouseEvent*.cs          # Mouse move events
+│   ├── GamepadButtonEvent*.cs  # Gamepad events
 │   └── NuciXNA.Input.csproj
+├── NuciXNA.Input.ArchitectureTests/ # Architecture and fitness tests
+│   ├── *Tests.cs
+│   └── NuciXNA.Input.ArchitectureTests.csproj
 ├── NuciXNA.Input.UnitTests/    # NUnit tests
 │   ├── *Tests.cs
 │   └── NuciXNA.Input.UnitTests.csproj

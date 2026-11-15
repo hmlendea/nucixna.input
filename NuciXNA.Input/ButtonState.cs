@@ -28,7 +28,7 @@ namespace NuciXNA.Input
         /// </summary>
         public static readonly ButtonState HeldDown = new(3, nameof(HeldDown), true);
 
-        static readonly Dictionary<int, ButtonState> entries = new()
+        private static readonly Dictionary<int, ButtonState> entries = new()
         {
             { Idle.Id, Idle },
             { Pressed.Id, Pressed },
@@ -36,12 +36,25 @@ namespace NuciXNA.Input
             { HeldDown.Id, HeldDown }
         };
 
-        static readonly ButtonState[] cachedValues = [Idle, Pressed, Released, HeldDown];
+        private static readonly ButtonState[] cachedValues =
+            [Idle, Pressed, Released, HeldDown];
 
+        /// <summary>
+        /// Gets the identifier.
+        /// </summary>
+        /// <value>The identifier.</value>
         public int Id { get; }
 
+        /// <summary>
+        /// Gets the name.
+        /// </summary>
+        /// <value>The name.</value>
         public string Name { get; }
 
+        /// <summary>
+        /// Gets a value indicating whether the button is down.
+        /// </summary>
+        /// <value>Whether the button is down.</value>
         public bool IsDown { get; }
 
         private ButtonState(int id, string name, bool isDown)
@@ -51,16 +64,28 @@ namespace NuciXNA.Input
             IsDown = isDown;
         }
 
+        /// <summary>
+        /// Gets the state with the specified identifier.
+        /// </summary>
+        /// <param name="id">The identifier.</param>
+        /// <returns>The matching state.</returns>
         public static ButtonState FromId(int id)
         {
             if (!entries.TryGetValue(id, out ButtonState value))
             {
-                throw new ArgumentException($"A {nameof(ButtonState)} with the identifier \"{id}\" does not exist");
+                throw new ArgumentException(
+                    $"A {nameof(ButtonState)} with the identifier \"{id}\" " +
+                    "does not exist");
             }
 
             return value;
         }
 
+        /// <summary>
+        /// Gets the state with the specified name.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <returns>The matching state.</returns>
         public static ButtonState FromName(string name)
         {
             foreach (ButtonState state in cachedValues)
@@ -71,31 +96,50 @@ namespace NuciXNA.Input
                 }
             }
 
-            throw new ArgumentException($"A {nameof(ButtonState)} with the name \"{name}\" does not exist");
+            throw new ArgumentException(
+                $"A {nameof(ButtonState)} with the name \"{name}\" " +
+                "does not exist");
         }
 
-        public override string ToString() => Name;
-
-        public override int GetHashCode() => Id.GetHashCode();
-
+        /// <summary>
+        /// Gets all the states.
+        /// </summary>
+        /// <returns>All the states.</returns>
         public static IEnumerable<ButtonState> GetValues() => cachedValues;
 
-        public bool Equals(ButtonState other)
+        /// <summary>
+        /// Returns the name of the state.
+        /// </summary>
+        /// <returns>The name of the state.</returns>
+        public override string ToString() => Name;
+
+        /// <summary>
+        /// Serves as a hash function for a <see cref="ButtonState"/> object.
+        /// </summary>
+        /// <returns>A hash code for the current state.</returns>
+        public override int GetHashCode() => Id.GetHashCode();
+
+        /// <summary>
+        /// Determines whether the specified state is equal to the current state.
+        /// </summary>
+        /// <param name="other">The state to compare with the current state.</param>
+        /// <returns>Whether the states are equal.</returns>
+        public bool Equals(ButtonState? other)
         {
             if (other is null)
             {
                 return false;
             }
 
-            if (!other.Id.Equals(Id))
-            {
-                return false;
-            }
-
-            return true;
+            return other.Id.Equals(Id);
         }
 
-        public override bool Equals(object obj)
+        /// <summary>
+        /// Determines whether the specified <see cref="object"/> is equal to the current state.
+        /// </summary>
+        /// <param name="obj">The object to compare with the current state.</param>
+        /// <returns>Whether the objects are equal.</returns>
+        public override bool Equals(object? obj)
         {
             if (obj is null)
             {
@@ -105,7 +149,13 @@ namespace NuciXNA.Input
             return Equals(obj as ButtonState);
         }
 
-        public static bool operator ==(ButtonState me, ButtonState other)
+        /// <summary>
+        /// Determines whether two states are equal.
+        /// </summary>
+        /// <param name="me">The first state.</param>
+        /// <param name="other">The second state.</param>
+        /// <returns>Whether the states are equal.</returns>
+        public static bool operator ==(ButtonState? me, ButtonState? other)
         {
             if (me is null)
             {
@@ -115,14 +165,41 @@ namespace NuciXNA.Input
             return me.Equals(other);
         }
 
-        public static bool operator !=(ButtonState me, ButtonState other) => !(me == other);
+        /// <summary>
+        /// Determines whether two states are different.
+        /// </summary>
+        /// <param name="me">The first state.</param>
+        /// <param name="other">The second state.</param>
+        /// <returns>Whether the states are different.</returns>
+        public static bool operator !=(ButtonState? me, ButtonState? other)
+            => !(me == other);
 
+        /// <summary>
+        /// Converts a state to its identifier.
+        /// </summary>
+        /// <param name="me">The state.</param>
+        /// <returns>The identifier.</returns>
         public static implicit operator int(ButtonState me) => me.Id;
 
+        /// <summary>
+        /// Converts a state to its name.
+        /// </summary>
+        /// <param name="me">The state.</param>
+        /// <returns>The name.</returns>
         public static implicit operator string(ButtonState me) => me.ToString();
 
+        /// <summary>
+        /// Converts an identifier to a state.
+        /// </summary>
+        /// <param name="id">The identifier.</param>
+        /// <returns>The state.</returns>
         public static implicit operator ButtonState(int id) => FromId(id);
 
+        /// <summary>
+        /// Converts a name to a state.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <returns>The state.</returns>
         public static implicit operator ButtonState(string name) => FromName(name);
     }
 }

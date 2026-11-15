@@ -1,16 +1,12 @@
-﻿using NuciXNA.Primitives;
+using NuciXNA.Primitives;
 
 namespace NuciXNA.Input
 {
     /// <summary>
-    /// Mouse event handler.
-    /// </summary>
-    public delegate void MouseEventHandler(object sender, MouseEventArgs e);
-
-    /// <summary>
     /// Mouse event arguments.
     /// </summary>
     /// <param name="location">Mouse location.</param>
+    /// <param name="previousLocation">Previous mouse location.</param>
     public sealed class MouseEventArgs(
         Point2D location,
         Point2D previousLocation)

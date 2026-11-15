@@ -151,7 +151,7 @@ dotnet build NuciXNA.Input.csproj
 ### Test
 
 ```bash
-dotnet test NuciXNA.Input.sln
+dotnet test NuciXNA.Input.slnx
 ```
 
 ## 🏗️ Architecture

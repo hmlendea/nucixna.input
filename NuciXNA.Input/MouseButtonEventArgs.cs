@@ -1,12 +1,7 @@
-﻿using NuciXNA.Primitives;
+using NuciXNA.Primitives;
 
 namespace NuciXNA.Input
 {
-    /// <summary>
-    /// Mouse button event handler.
-    /// </summary>
-    public delegate void MouseButtonEventHandler(object sender, MouseButtonEventArgs e);
-
     /// <summary>
     /// Mouse button event arguments.
     /// </summary>

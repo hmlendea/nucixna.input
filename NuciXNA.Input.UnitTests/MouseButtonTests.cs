@@ -1,13 +1,15 @@
 using System;
+using System.Collections.Generic;
 
 using NUnit.Framework;
 
 namespace NuciXNA.Input.UnitTests
 {
-    public class MouseButtonTests
+    [TestFixture]
+    public sealed class MouseButtonTests
     {
         [Test]
-        public void FromId_ReturnsCorrectMouseButton()
+        public void GivenExistingIdentifier_WhenCallingFromId_ThenReturnsTheMatchingButton()
         {
             foreach (MouseButton state in MouseButton.GetValues())
             {
@@ -16,11 +18,11 @@ namespace NuciXNA.Input.UnitTests
         }
 
         [Test]
-        public void FromId_CalledWithInexistentId_ThrowsArgumentException()
+        public void GivenInexistentIdentifier_WhenCallingFromId_ThenThrowsArgumentException()
             => Assert.Throws<ArgumentException>(() => MouseButton.FromId(873));
 
         [Test]
-        public void FromName_ReturnsCorrectMouseButton()
+        public void GivenExistingName_WhenCallingFromName_ThenReturnsTheMatchingButton()
         {
             foreach (MouseButton state in MouseButton.GetValues())
             {
@@ -29,11 +31,11 @@ namespace NuciXNA.Input.UnitTests
         }
 
         [Test]
-        public void FromName_CalledWithInexistentName_ThrowsArgumentException()
+        public void GivenInexistentName_WhenCallingFromName_ThenThrowsArgumentException()
             => Assert.Throws<ArgumentException>(() => MouseButton.FromName("Hori"));
 
         [Test]
-        public void ToString_ReturnsCorrectValue()
+        public void GivenButton_WhenCallingToString_ThenReturnsItsName()
         {
             foreach (MouseButton state in MouseButton.GetValues())
             {
@@ -42,7 +44,7 @@ namespace NuciXNA.Input.UnitTests
         }
 
         [Test]
-        public void GetHashCode_ReturnsCorrectValue()
+        public void GivenButton_WhenCallingGetHashCode_ThenReturnsIdentifierHash()
         {
             foreach (MouseButton state in MouseButton.GetValues())
             {
@@ -51,45 +53,45 @@ namespace NuciXNA.Input.UnitTests
         }
 
         [Test]
-        public void Equals_CalledWithSameMouseButton_ReturnsTrue()
+        public void GivenSameButton_WhenCheckingEquality_ThenReturnsTrue()
             => Assert.That(MouseButton.Left.Equals(MouseButton.Left));
 
         [Test]
-        public void Equals_CalledWithOtherMouseButton_ReturnsFalse()
+        public void GivenDifferentButton_WhenCheckingEquality_ThenReturnsFalse()
             => Assert.That(MouseButton.Left.Equals(MouseButton.Right), Is.False);
 
         [Test]
-        public void Equals_CalledWithSameMouseButtonAsObject_ReturnsTrue()
+        public void GivenSameButtonAsObject_WhenCheckingEquality_ThenReturnsTrue()
             => Assert.That(MouseButton.Left.Equals((object)MouseButton.Left));
 
         [Test]
-        public void Equals_CalledWithOtherMouseButtonAsObject_ReturnsFalse()
+        public void GivenDifferentButtonAsObject_WhenCheckingEquality_ThenReturnsFalse()
             => Assert.That(MouseButton.Left.Equals((object)MouseButton.Right), Is.False);
 
         [Test]
-        public void Equals_CalledWithOtherType_ReturnsFalse()
+        public void GivenUnrelatedType_WhenCheckingEquality_ThenReturnsFalse()
             => Assert.That(MouseButton.Left.Equals(DateTime.Now), Is.False);
 
         [Test]
-        public void Equals_CalledWithNull_ReturnsFalse()
+        public void GivenNull_WhenCheckingEquality_ThenReturnsFalse()
             => Assert.That(MouseButton.Left.Equals(null), Is.False);
 
         [Test]
-        public void EqualsOperator_OtherIsSameMouseButton_ReturnsTrue()
+        public void GivenSameButton_WhenUsingEqualityOperator_ThenReturnsTrue()
             => Assert.That(MouseButton.Left == MouseButton.Left);
 
         [Test]
-        public void EqualsOperator_CurrentIsNull_ReturnsFalse()
+        public void GivenNullLeftOperand_WhenUsingEqualityOperator_ThenReturnsFalse()
         {
             Assert.That(null == MouseButton.Left, Is.False);
         }
 
         [Test]
-        public void EqualsOperator_OtherIsNull_ReturnsFalse()
+        public void GivenNullRightOperand_WhenUsingEqualityOperator_ThenReturnsFalse()
             => Assert.That(MouseButton.Left == null, Is.False);
 
         [Test]
-        public void CastAsInt_ReturnsCorrectValue()
+        public void GivenButton_WhenCastingToInteger_ThenReturnsItsIdentifier()
         {
             MouseButton state = MouseButton.Left;
 
@@ -97,7 +99,7 @@ namespace NuciXNA.Input.UnitTests
         }
 
         [Test]
-        public void CastAsString_ReturnsCorrectValue()
+        public void GivenButton_WhenCastingToString_ThenReturnsItsName()
         {
             MouseButton state = MouseButton.Left;
 
@@ -105,7 +107,7 @@ namespace NuciXNA.Input.UnitTests
         }
 
         [Test]
-        public void AssignInteger_AssignedExistingId_ReturnsCorrectMouseButton()
+        public void GivenExistingIdentifier_WhenAssigningToButton_ThenReturnsTheButton()
         {
             foreach (MouseButton state in MouseButton.GetValues())
             {
@@ -114,7 +116,7 @@ namespace NuciXNA.Input.UnitTests
         }
 
         [Test]
-        public void AssignInteger_AssignedInexistentId_ThrowsArgumentException()
+        public void GivenInexistentIdentifier_WhenAssigningToButton_ThenThrows()
         {
             MouseButton state;
 
@@ -122,7 +124,7 @@ namespace NuciXNA.Input.UnitTests
         }
 
         [Test]
-        public void AssignString_AssignedExistingName_ReturnsCorrectMouseButton()
+        public void GivenExistingName_WhenAssigningToButton_ThenReturnsTheButton()
         {
             foreach (MouseButton state in MouseButton.GetValues())
             {
@@ -131,7 +133,7 @@ namespace NuciXNA.Input.UnitTests
         }
 
         [Test]
-        public void AssignString_AssignedInexistentName_ThrowsArgumentException()
+        public void GivenInexistentName_WhenAssigningToButton_ThenThrows()
         {
             MouseButton state;
 
@@ -139,29 +141,31 @@ namespace NuciXNA.Input.UnitTests
         }
 
         [Test]
-        public void GivenTwoNullMouseButtons_WhenComparedWithEqualsOperator_ThenReturnsTrue()
+        public void GivenTwoNullButtons_WhenUsingEqualityOperator_ThenReturnsTrue()
             => Assert.That((MouseButton)null == (MouseButton)null);
 
         [Test]
-        public void GivenSameMouseButton_WhenComparedWithNotEqualsOperator_ThenReturnsFalse()
-            => Assert.That(MouseButton.Left != MouseButton.Left, Is.False);
+        public void GivenSameButton_WhenUsingNotEqualsOperator_ThenReturnsFalse()
+            => Assert.That(
+                MouseButton.Left != MouseButton.Left,
+                Is.False);
 
         [Test]
-        public void GivenDifferentMouseButtons_WhenComparedWithNotEqualsOperator_ThenReturnsTrue()
+        public void GivenDifferentButtons_WhenUsingNotEqualsOperator_ThenReturnsTrue()
             => Assert.That(MouseButton.Left != MouseButton.Right);
 
         [Test]
-        public void GivenNullAndNonNullMouseButton_WhenComparedWithNotEqualsOperator_ThenReturnsTrue()
+        public void GivenNullAndButton_WhenUsingNotEqualsOperator_ThenReturnsTrue()
             => Assert.That(null != MouseButton.Left);
 
         [Test]
-        public void GivenMouseButton_WhenGetValuesIsCalled_ThenReturnsFiveItems()
+        public void GivenButton_WhenGetValuesIsCalled_ThenReturnsFiveItems()
             => Assert.That(MouseButton.GetValues(), Has.Exactly(5).Items);
 
         [Test]
-        public void GivenMouseButton_WhenGetValuesIsCalled_ThenContainsAllButtons()
+        public void GivenButton_WhenGetValuesIsCalled_ThenContainsAllButtons()
         {
-            var values = MouseButton.GetValues();
+            IEnumerable<MouseButton> values = MouseButton.GetValues();
 
             Assert.That(values, Contains.Item(MouseButton.Left));
             Assert.That(values, Contains.Item(MouseButton.Right));

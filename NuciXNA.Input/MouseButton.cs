@@ -33,7 +33,7 @@ namespace NuciXNA.Input
         /// </summary>
         public static readonly MouseButton Forward = new(5, nameof(Forward));
 
-        static readonly Dictionary<int, MouseButton> entries = new()
+        private static readonly Dictionary<int, MouseButton> entries = new()
         {
             { Left.Id, Left },
             { Right.Id, Right },
@@ -42,10 +42,19 @@ namespace NuciXNA.Input
             { Forward.Id, Forward }
         };
 
-        static readonly MouseButton[] cachedValues = [Left, Right, Middle, Back, Forward];
+        private static readonly MouseButton[] cachedValues =
+            [Left, Right, Middle, Back, Forward];
 
+        /// <summary>
+        /// Gets the identifier.
+        /// </summary>
+        /// <value>The identifier.</value>
         public int Id { get; }
 
+        /// <summary>
+        /// Gets the name.
+        /// </summary>
+        /// <value>The name.</value>
         public string Name { get; }
 
         private MouseButton(int id, string name)
@@ -54,16 +63,28 @@ namespace NuciXNA.Input
             Name = name;
         }
 
+        /// <summary>
+        /// Gets the mouse button with the specified identifier.
+        /// </summary>
+        /// <param name="id">The identifier.</param>
+        /// <returns>The matching mouse button.</returns>
         public static MouseButton FromId(int id)
         {
             if (!entries.TryGetValue(id, out MouseButton value))
             {
-                throw new ArgumentException($"A {nameof(MouseButton)} with the identifier \"{id}\" does not exist");
+                throw new ArgumentException(
+                    $"A {nameof(MouseButton)} with the identifier \"{id}\" " +
+                    "does not exist");
             }
 
             return value;
         }
 
+        /// <summary>
+        /// Gets the mouse button with the specified name.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <returns>The matching mouse button.</returns>
         public static MouseButton FromName(string name)
         {
             foreach (MouseButton button in cachedValues)
@@ -74,16 +95,35 @@ namespace NuciXNA.Input
                 }
             }
 
-            throw new ArgumentException($"A {nameof(MouseButton)} with the name \"{name}\" does not exist");
+            throw new ArgumentException(
+                $"A {nameof(MouseButton)} with the name \"{name}\" " +
+                "does not exist");
         }
 
-        public override string ToString() => Name;
-
-        public override int GetHashCode() => Id.GetHashCode();
-
+        /// <summary>
+        /// Gets all the mouse buttons.
+        /// </summary>
+        /// <returns>All the mouse buttons.</returns>
         public static IEnumerable<MouseButton> GetValues() => cachedValues;
 
-        public bool Equals(MouseButton other)
+        /// <summary>
+        /// Returns the name of the mouse button.
+        /// </summary>
+        /// <returns>The name of the mouse button.</returns>
+        public override string ToString() => Name;
+
+        /// <summary>
+        /// Serves as a hash function for a <see cref="MouseButton"/> object.
+        /// </summary>
+        /// <returns>A hash code for the current mouse button.</returns>
+        public override int GetHashCode() => Id.GetHashCode();
+
+        /// <summary>
+        /// Determines whether the specified button is equal to the current button.
+        /// </summary>
+        /// <param name="other">The button to compare with the current button.</param>
+        /// <returns>Whether the buttons are equal.</returns>
+        public bool Equals(MouseButton? other)
         {
             if (other is null)
             {
@@ -93,7 +133,12 @@ namespace NuciXNA.Input
             return object.Equals(other.Id, Id);
         }
 
-        public override bool Equals(object obj)
+        /// <summary>
+        /// Determines whether the specified object is equal to the current button.
+        /// </summary>
+        /// <param name="obj">The object to compare with the current button.</param>
+        /// <returns>Whether the objects are equal.</returns>
+        public override bool Equals(object? obj)
         {
             if (obj is null)
             {
@@ -103,7 +148,13 @@ namespace NuciXNA.Input
             return Equals(obj as MouseButton);
         }
 
-        public static bool operator ==(MouseButton me, MouseButton other)
+        /// <summary>
+        /// Determines whether two mouse buttons are equal.
+        /// </summary>
+        /// <param name="me">The first mouse button.</param>
+        /// <param name="other">The second mouse button.</param>
+        /// <returns>Whether the mouse buttons are equal.</returns>
+        public static bool operator ==(MouseButton? me, MouseButton? other)
         {
             if (me is null)
             {
@@ -113,14 +164,41 @@ namespace NuciXNA.Input
             return me.Equals(other);
         }
 
-        public static bool operator !=(MouseButton me, MouseButton other) => !(me == other);
+        /// <summary>
+        /// Determines whether two mouse buttons are different.
+        /// </summary>
+        /// <param name="me">The first mouse button.</param>
+        /// <param name="other">The second mouse button.</param>
+        /// <returns>Whether the mouse buttons are different.</returns>
+        public static bool operator !=(MouseButton? me, MouseButton? other)
+            => !(me == other);
 
+        /// <summary>
+        /// Converts a mouse button to its identifier.
+        /// </summary>
+        /// <param name="me">The mouse button.</param>
+        /// <returns>The identifier.</returns>
         public static implicit operator int(MouseButton me) => me.Id;
 
+        /// <summary>
+        /// Converts a mouse button to its name.
+        /// </summary>
+        /// <param name="me">The mouse button.</param>
+        /// <returns>The name.</returns>
         public static implicit operator string(MouseButton me) => me.ToString();
 
+        /// <summary>
+        /// Converts an identifier to a mouse button.
+        /// </summary>
+        /// <param name="id">The identifier.</param>
+        /// <returns>The mouse button.</returns>
         public static implicit operator MouseButton(int id) => FromId(id);
 
+        /// <summary>
+        /// Converts a name to a mouse button.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <returns>The mouse button.</returns>
         public static implicit operator MouseButton(string name) => FromName(name);
     }
 }

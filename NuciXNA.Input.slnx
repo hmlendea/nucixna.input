@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="NuciXNA.Input/NuciXNA.Input.csproj" />
+  <Project Path="NuciXNA.Input.ArchitectureTests/NuciXNA.Input.ArchitectureTests.csproj" />
+  <Project Path="NuciXNA.Input.UnitTests/NuciXNA.Input.UnitTests.csproj" />
+</Solution>

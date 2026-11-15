@@ -7,16 +7,24 @@ NuciXNA.Input is a lightweight input management library for MonoGame/XNA applica
 ## Repository Structure
 
 ```
-NuciXNA.Input.sln
+NuciXNA.Input.slnx
 ├── NuciXNA.Input/                 # Main library project
 │   ├── InputManager.cs            # Core singleton input manager
+│   ├── IInputManager.cs           # Input manager interface
 │   ├── ButtonState.cs             # Frame-based button state enum-like class
-│   ├── KeyboardKeyEvent.cs        # Keyboard event args + delegate
 │   ├── MouseButton.cs             # Mouse button enum-like class
-│   ├── MouseButtonEvent.cs        # Mouse button event args + delegate
-│   ├── MouseEvent.cs              # Mouse movement event args + delegate
-│   ├── GamepadButtonEvent.cs      # Gamepad button event args + delegate
+│   ├── KeyboardKeyEventArgs.cs    # Keyboard event arguments
+│   ├── KeyboardKeyEventHandler.cs # Keyboard event delegate
+│   ├── MouseButtonEventArgs.cs    # Mouse button event arguments
+│   ├── MouseButtonEventHandler.cs # Mouse button event delegate
+│   ├── MouseEventArgs.cs          # Mouse movement event arguments
+│   ├── MouseEventHandler.cs       # Mouse movement event delegate
+│   ├── GamepadButtonEventArgs.cs  # Gamepad button event arguments
+│   ├── GamepadButtonEventHandler.cs # Gamepad button event delegate
 │   └── NuciXNA.Input.csproj
+├── NuciXNA.Input.ArchitectureTests/ # Architecture and fitness tests (NUnit)
+│   ├── *Tests.cs
+│   └── NuciXNA.Input.ArchitectureTests.csproj
 ├── NuciXNA.Input.UnitTests/       # Unit test project (NUnit)
 │   ├── ButtonStateTests.cs
 │   ├── KeyboardKeyEventArgsTests.cs
@@ -146,10 +154,10 @@ Update(window)
 
 | Class | Location | Fields |
 |-------|----------|--------|
-| `KeyboardKeyEventArgs` | `KeyboardKeyEvent.cs` | `Keys Key`, `ButtonState KeyState` |
-| `MouseButtonEventArgs` | `MouseButtonEvent.cs` | `MouseButton Button`, `ButtonState ButtonState`, `Point2D Location` |
-| `MouseEventArgs` | `MouseEvent.cs` | `Point2D Location`, `Point2D PreviousLocation` |
-| `GamepadButtonEventArgs` | `GamepadButtonEvent.cs` | `Buttons Button`, `ButtonState ButtonState`, `PlayerIndex PlayerIndex` |
+| `KeyboardKeyEventArgs` | `KeyboardKeyEventArgs.cs` | `Keys Key`, `ButtonState KeyState` |
+| `MouseButtonEventArgs` | `MouseButtonEventArgs.cs` | `MouseButton Button`, `ButtonState ButtonState`, `Point2D Location` |
+| `MouseEventArgs` | `MouseEventArgs.cs` | `Point2D Location`, `Point2D PreviousLocation` |
+| `GamepadButtonEventArgs` | `GamepadButtonEventArgs.cs` | `Buttons Button`, `ButtonState ButtonState`, `PlayerIndex PlayerIndex` |
 
 All use `NuciXNA.Primitives.Point2D` for coordinates.
 
@@ -192,7 +200,8 @@ In `Update()`, when `Mouse.GetState().X < 0`, the code assumes the window is on 
 
 ## Testing
 
-- **Framework:** NUnit 4.6.1 + NUnit3TestAdapter 6.2.0
+- **Architecture tests:** NUnit 4.6.1 + ArchUnit.NET 0.13.5 + Microsoft.CodeAnalysis.CSharp 4.14.0 (dependency boundaries, project/solution configuration, source conventions)
+- **Unit tests:** NUnit 4.6.1 + NUnit3TestAdapter 6.2.0
 - **Coverage:** Event args construction, ButtonState/MouseButton conversions, equality, factory methods
 - **Missing:** Integration tests for `InputManager.Update()` event firing, state transitions, Linux coordinate fix
 
@@ -205,6 +214,6 @@ In `Update()`, when `Mouse.GetState().X < 0`, the code assumes the window is on 
 
 ## Versioning
 
-- Current: **2.1.1** (in NuciXNA.Input.csproj)
+- Current: **2.1.2** (in NuciXNA.Input.csproj)
 - Scheme: Semantic versioning
 - License: GPL-3.0-or-later

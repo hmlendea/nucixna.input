@@ -11,6 +11,26 @@ NuciXNA.Input.UnitTests/
 ├── MouseEventArgsTests.cs        # MouseEventArgs construction
 ├── GamepadButtonEventArgsTests.cs # GamepadButtonEventArgs construction
 └── NuciXNA.Input.UnitTests.csproj
+
+NuciXNA.Input.ArchitectureTests/
+├── ArchitectureResources.cs          # Embedded-source resource accessor
+├── ProductionArchitecture.cs         # Loaded production assembly and ArchUnit model
+├── DependencyRuleTests.cs            # Loaded assembly, public surface, and dependency boundaries
+├── SourceFileConventionTests.cs      # Namespaces, forbidden syntax, braces, parameter limits
+├── FileNameConventionTests.cs        # File name to type name matching
+├── MemberOrganisationTests.cs        # Member accessibility and ordering
+├── NamingConventionTests.cs          # Naming, casing, and test fixture conventions
+├── TypeDeclarationConventionTests.cs # Sealing, interfaces, and inheritance rules
+├── IndentationConventionTests.cs     # Whitespace, indentation, and file endings
+├── LineLengthConventionTests.cs      # Conditional and list line-splitting thresholds
+├── NamespaceConventionTests.cs       # Using groups, ordering, and qualified types
+├── DocumentationConventionTests.cs   # XML documentation on the NuGet surface
+├── ErrorHandlingConventionTests.cs   # Null guards, returns, and empty statements
+├── CodeStyleConventionTests.cs       # Async, catch, comment, and operator style
+├── TestSourceConventionTests.cs      # Fixture naming, assertions, and helper placement
+├── ProjectConventionTests.cs         # Project configuration conventions
+├── SolutionConventionTests.cs        # Solution configuration conventions
+└── NuciXNA.Input.ArchitectureTests.csproj
 ```
 
 ## Running Tests
@@ -18,6 +38,9 @@ NuciXNA.Input.UnitTests/
 ```bash
 # From solution root
 dotnet test
+
+# Architecture tests only
+dotnet test NuciXNA.Input.ArchitectureTests
 
 # From test project
 cd NuciXNA.Input.UnitTests
@@ -199,11 +222,12 @@ Runs on `ubuntu-latest` with .NET 10.0.x. Installs `ttf-mscorefonts-installer` f
 
 ## Test Design Principles
 
-1. **Unit tests only** — no integration tests currently
-2. **Constructor/property verification** — event args only
-3. **Enum-like class contracts** — conversions, equality, factories
-4. **No behavior tests** — `InputManager.Update()` logic untested
-5. **Deterministic** — no timing, no external dependencies
+1. **Architecture tests** — enforce dependency boundaries, project configuration, and source conventions
+2. **Unit tests only** — no integration tests currently
+3. **Constructor/property verification** — event args only
+4. **Enum-like class contracts** — conversions, equality, factories
+5. **No behavior tests** — `InputManager.Update()` logic untested
+6. **Deterministic** — no timing, no external dependencies
 
 ---
 
@@ -214,3 +238,5 @@ Runs on `ubuntu-latest` with .NET 10.0.x. Installs `ttf-mscorefonts-installer` f
 3. Use NUnit 4 attributes: `[TestFixture]`, `[Test]`, `[SetUp]`, `[TearDown]`
 4. Use `Assert.That()` syntax (NUnit 4 constraint model)
 5. Run `dotnet test` to verify
+
+Convention checks are enforced by `NuciXNA.Input.ArchitectureTests/`; any new production or test source must satisfy those rules before the suite passes.

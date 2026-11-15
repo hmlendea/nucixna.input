@@ -17,16 +17,38 @@ namespace NuciXNA.Input
     /// </summary>
     public sealed class InputManager : IInputManager
     {
-        static volatile InputManager instance;
-        static readonly Lock syncRoot = new();
-        static readonly Keys[] allKeys = Enum.GetValues<Keys>();
-        static readonly Buttons[] allButtons = Enum.GetValues<Buttons>();
-        static readonly PlayerIndex[] allPlayerIndices = Enum.GetValues<PlayerIndex>();
+        private static readonly Lock syncRoot = new();
+        private static readonly Keys[] allKeys = Enum.GetValues<Keys>();
+        private static readonly Buttons[] allButtons = Enum.GetValues<Buttons>();
+        private static readonly PlayerIndex[] allPlayerIndices = Enum.GetValues<PlayerIndex>();
 
-        GamePadState[] currentGamepadStates = new GamePadState[4];
-        GamePadState[] previousGamepadStates = new GamePadState[4];
-        KeyboardState currentKeyState, previousKeyState;
-        MouseState currentMouseState, previousMouseState;
+        private static volatile InputManager instance;
+
+        private GamePadState[] currentGamepadStates = new GamePadState[4];
+        private GamePadState[] previousGamepadStates = new GamePadState[4];
+        private KeyboardState currentKeyState;
+        private KeyboardState previousKeyState;
+        private MouseState currentMouseState;
+        private MouseState previousMouseState;
+
+        /// <summary>
+        /// Gets the instance.
+        /// </summary>
+        /// <value>The instance.</value>
+        public static InputManager Instance => GetInstance();
+
+        /// <summary>
+        /// Gets the current mouse location.
+        /// </summary>
+        /// <value>The current mouse location.</value>
+        public Point2D MouseLocation
+            => new(currentMouseState.Position.X, currentMouseState.Position.Y);
+
+        /// <summary>
+        /// Gets or sets whether mouse button input was handled.
+        /// </summary>
+        /// <value>Whether mouse button input was handled.</value>
+        public bool MouseButtonInputHandled { get; set; }
 
         /// <summary>
         /// Occurs when a mouse button was pressed.
@@ -77,26 +99,6 @@ namespace NuciXNA.Input
         /// Occurs when a keyboard key is down.
         /// </summary>
         public event KeyboardKeyEventHandler KeyboardKeyHeldDown;
-
-        /// <summary>
-        /// Gets the instance.
-        /// </summary>
-        /// <value>The instance.</value>
-        public static InputManager Instance
-        {
-            get
-            {
-                if (instance == null)
-                {
-                    lock (syncRoot)
-                    {
-                        instance ??= new InputManager();
-                    }
-                }
-
-                return instance;
-            }
-        }
 
         /// <summary>
         /// Updates the input state.
@@ -195,7 +197,9 @@ namespace NuciXNA.Input
         /// <param name="playerIndex">Player index.</param>
         /// <param name="buttons">Buttons to check.</param>
         /// <returns>True if any button is down.</returns>
-        public bool IsAnyGamepadButtonDown(PlayerIndex playerIndex, IEnumerable<Buttons> buttons)
+        public bool IsAnyGamepadButtonDown(
+            PlayerIndex playerIndex,
+            IEnumerable<Buttons> buttons)
             => buttons.Any(b => currentGamepadStates[(int)playerIndex].IsButtonDown(b));
 
         /// <summary>
@@ -264,35 +268,78 @@ namespace NuciXNA.Input
                 .Select(GetMouseButtonState)
                 .Any(x => x.IsDown);
 
-        void CheckGamepadButtonStates()
+        private static InputManager GetInstance()
+        {
+            if (instance is null)
+            {
+                lock (syncRoot)
+                {
+                    instance ??= new InputManager();
+                }
+            }
+
+            return instance;
+        }
+
+        private void CheckGamepadButtonStates()
         {
             foreach (PlayerIndex playerIndex in allPlayerIndices)
             {
                 foreach (Buttons button in allButtons)
                 {
-                    bool isCurrentlyDown = currentGamepadStates[(int)playerIndex].IsButtonDown(button);
-                    bool wasPreviouslyDown = previousGamepadStates[(int)playerIndex].IsButtonDown(button);
-
-                    if (isCurrentlyDown)
-                    {
-                        if (wasPreviouslyDown)
-                        {
-                            OnGamepadButtonHeldDown(this, new GamepadButtonEventArgs(button, ButtonState.HeldDown, playerIndex));
-                        }
-                        else
-                        {
-                            OnGamepadButtonPressed(this, new GamepadButtonEventArgs(button, ButtonState.Pressed, playerIndex));
-                        }
-                    }
-                    else if (!isCurrentlyDown && wasPreviouslyDown)
-                    {
-                        OnGamepadButtonReleased(this, new GamepadButtonEventArgs(button, ButtonState.Released, playerIndex));
-                    }
+                    CheckGamepadButtonState(playerIndex, button);
                 }
             }
         }
 
-        void CheckKeyboardKeyStates()
+        private void CheckGamepadButtonState(PlayerIndex playerIndex, Buttons button)
+        {
+            GamePadState currentState = currentGamepadStates[(int)playerIndex];
+            GamePadState previousState = previousGamepadStates[(int)playerIndex];
+            bool isCurrentlyDown = currentState.IsButtonDown(button);
+            bool wasPreviouslyDown = previousState.IsButtonDown(button);
+
+            if (isCurrentlyDown)
+            {
+                NotifyGamepadButtonDown(playerIndex, button, wasPreviouslyDown);
+            }
+            else if (wasPreviouslyDown)
+            {
+                OnGamepadButtonReleased(
+                    this,
+                    new GamepadButtonEventArgs(
+                        button,
+                        ButtonState.Released,
+                        playerIndex));
+            }
+        }
+
+        private void NotifyGamepadButtonDown(
+            PlayerIndex playerIndex,
+            Buttons button,
+            bool wasPreviouslyDown)
+        {
+            if (wasPreviouslyDown)
+            {
+                OnGamepadButtonHeldDown(
+                    this,
+                    new GamepadButtonEventArgs(
+                        button,
+                        ButtonState.HeldDown,
+                        playerIndex));
+            }
+            else
+            {
+                OnGamepadButtonPressed(
+                    this,
+                    new GamepadButtonEventArgs(
+                        button,
+                        ButtonState.Pressed,
+                        playerIndex));
+            }
+        }
+
+        private void CheckKeyboardKeyStates()
         {
             Keys[] currentPressedKeys = currentKeyState.GetPressedKeys();
             Keys[] previousPressedKeys = previousKeyState.GetPressedKeys();
@@ -301,11 +348,15 @@ namespace NuciXNA.Input
             {
                 if (previousKeyState.IsKeyDown(key))
                 {
-                    OnKeyboardKeyHeldDown(this, new KeyboardKeyEventArgs(key, ButtonState.HeldDown));
+                    OnKeyboardKeyHeldDown(
+                        this,
+                        new KeyboardKeyEventArgs(key, ButtonState.HeldDown));
                 }
                 else
                 {
-                    OnKeyboardKeyPressed(this, new KeyboardKeyEventArgs(key, ButtonState.Pressed));
+                    OnKeyboardKeyPressed(
+                        this,
+                        new KeyboardKeyEventArgs(key, ButtonState.Pressed));
                 }
             }
 
@@ -313,12 +364,14 @@ namespace NuciXNA.Input
             {
                 if (!currentKeyState.IsKeyDown(key))
                 {
-                    OnKeyboardKeyReleased(this, new KeyboardKeyEventArgs(key, ButtonState.Released));
+                    OnKeyboardKeyReleased(
+                        this,
+                        new KeyboardKeyEventArgs(key, ButtonState.Released));
                 }
             }
         }
 
-        void CheckMouseButtonStates()
+        private void CheckMouseButtonStates()
         {
             Point2D cursorLocation = currentMouseState.Position.ToPoint2D();
 
@@ -346,19 +399,24 @@ namespace NuciXNA.Input
             }
         }
 
-        void CheckMouseMoved()
+        private void CheckMouseMoved()
         {
-            if (currentMouseState.Position.Equals(previousMouseState.Position))
+            Point position = currentMouseState.Position;
+            Point previousPosition = previousMouseState.Position;
+
+            if (position.Equals(previousPosition))
             {
                 return;
             }
 
-            OnMouseMoved(this, new(
-                currentMouseState.Position.ToPoint2D(),
-                previousMouseState.Position.ToPoint2D()));
+            OnMouseMoved(
+                this,
+                new(
+                    position.ToPoint2D(),
+                    previousPosition.ToPoint2D()));
         }
 
-        ButtonState GetMouseButtonState(MouseButton button)
+        private ButtonState GetMouseButtonState(MouseButton button)
         {
             XNAButtonState currentState = XNAButtonState.Released;
             XNAButtonState previousState = XNAButtonState.Released;
@@ -412,7 +470,7 @@ namespace NuciXNA.Input
         /// </summary>
         /// <param name="sender">Sender object.</param>
         /// <param name="e">Event arguments.</param>
-        void OnGamepadButtonPressed(object sender, GamepadButtonEventArgs e)
+        private void OnGamepadButtonPressed(object sender, GamepadButtonEventArgs e)
             => GamepadButtonPressed?.Invoke(sender, e);
 
         /// <summary>
@@ -420,7 +478,7 @@ namespace NuciXNA.Input
         /// </summary>
         /// <param name="sender">Sender object.</param>
         /// <param name="e">Event arguments.</param>
-        void OnGamepadButtonReleased(object sender, GamepadButtonEventArgs e)
+        private void OnGamepadButtonReleased(object sender, GamepadButtonEventArgs e)
             => GamepadButtonReleased?.Invoke(sender, e);
 
         /// <summary>
@@ -428,7 +486,7 @@ namespace NuciXNA.Input
         /// </summary>
         /// <param name="sender">Sender object.</param>
         /// <param name="e">Event arguments.</param>
-        void OnGamepadButtonHeldDown(object sender, GamepadButtonEventArgs e)
+        private void OnGamepadButtonHeldDown(object sender, GamepadButtonEventArgs e)
             => GamepadButtonHeldDown?.Invoke(sender, e);
 
         /// <summary>
@@ -436,7 +494,7 @@ namespace NuciXNA.Input
         /// </summary>
         /// <param name="sender">Sender object.</param>
         /// <param name="e">Event arguments.</param>
-        void OnKeyboardKeyPressed(object sender, KeyboardKeyEventArgs e)
+        private void OnKeyboardKeyPressed(object sender, KeyboardKeyEventArgs e)
             => KeyboardKeyPressed?.Invoke(sender, e);
 
         /// <summary>
@@ -444,7 +502,7 @@ namespace NuciXNA.Input
         /// </summary>
         /// <param name="sender">Sender object.</param>
         /// <param name="e">Event arguments.</param>
-        void OnKeyboardKeyReleased(object sender, KeyboardKeyEventArgs e)
+        private void OnKeyboardKeyReleased(object sender, KeyboardKeyEventArgs e)
             => KeyboardKeyReleased?.Invoke(sender, e);
 
         /// <summary>
@@ -452,7 +510,7 @@ namespace NuciXNA.Input
         /// </summary>
         /// <param name="sender">Sender object.</param>
         /// <param name="e">Event arguments.</param>
-        void OnKeyboardKeyHeldDown(object sender, KeyboardKeyEventArgs e)
+        private void OnKeyboardKeyHeldDown(object sender, KeyboardKeyEventArgs e)
             => KeyboardKeyHeldDown?.Invoke(sender, e);
 
         /// <summary>
@@ -460,7 +518,7 @@ namespace NuciXNA.Input
         /// </summary>
         /// <param name="sender">Sender object.</param>
         /// <param name="e">Event arguments.</param>
-        void OnMouseButtonPressed(object sender, MouseButtonEventArgs e)
+        private void OnMouseButtonPressed(object sender, MouseButtonEventArgs e)
             => MouseButtonPressed?.Invoke(sender, e);
 
         /// <summary>
@@ -468,7 +526,7 @@ namespace NuciXNA.Input
         /// </summary>
         /// <param name="sender">Sender object.</param>
         /// <param name="e">Event arguments.</param>
-        void OnMouseButtonReleased(object sender, MouseButtonEventArgs e)
+        private void OnMouseButtonReleased(object sender, MouseButtonEventArgs e)
             => MouseButtonReleased?.Invoke(sender, e);
 
         /// <summary>
@@ -476,7 +534,7 @@ namespace NuciXNA.Input
         /// </summary>
         /// <param name="sender">Sender object.</param>
         /// <param name="e">Event arguments.</param>
-        void OnMouseButtonHeldDown(object sender, MouseButtonEventArgs e)
+        private void OnMouseButtonHeldDown(object sender, MouseButtonEventArgs e)
             => MouseButtonHeldDown?.Invoke(sender, e);
 
         /// <summary>
@@ -484,21 +542,8 @@ namespace NuciXNA.Input
         /// </summary>
         /// <param name="sender">Sender object.</param>
         /// <param name="e">Event arguments.</param>
-        void OnMouseMoved(object sender, MouseEventArgs e)
+        private void OnMouseMoved(object sender, MouseEventArgs e)
             => MouseMoved?.Invoke(sender, e);
-
-        // TODO: Everything below this is required by a workaround to a problem and should be removed as soon as it is properly fixed
-
-        /// <summary>
-        /// Gets the current mouse location.
-        /// </summary>
-        /// <value>The current mouse location.</value>
-        public Point2D MouseLocation => new(currentMouseState.Position.X, currentMouseState.Position.Y);
-
-        /// <summary>
-        /// Gets or sets whether mouse button input was handled.
-        /// </summary>
-        public bool MouseButtonInputHandled { get; set; }
 
         /// <summary>
         /// Checks if the left mouse button was clicked.

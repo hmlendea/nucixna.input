@@ -3,13 +3,15 @@ using NUnit.Framework;
 
 namespace NuciXNA.Input.UnitTests
 {
-    public class MouseEventArgsTests
+    [TestFixture]
+
+    public sealed class MouseEventArgsTests
     {
         [Test]
         public void GivenMouseEventArgs_WhenCreated_ThenLocationIsSetCorrectly()
         {
-            var location = new Point2D(15, 30);
-            var args = new MouseEventArgs(location, new Point2D(0, 0));
+            Point2D location = new(15, 30);
+            MouseEventArgs args = new(location, new Point2D(0, 0));
 
             Assert.That(args.Location, Is.EqualTo(location));
         }
@@ -17,8 +19,8 @@ namespace NuciXNA.Input.UnitTests
         [Test]
         public void GivenMouseEventArgs_WhenCreated_ThenPreviousLocationIsSetCorrectly()
         {
-            var previousLocation = new Point2D(5, 10);
-            var args = new MouseEventArgs(new Point2D(15, 30), previousLocation);
+            Point2D previousLocation = new(5, 10);
+            MouseEventArgs args = new(new Point2D(15, 30), previousLocation);
 
             Assert.That(args.PreviousLocation, Is.EqualTo(previousLocation));
         }
