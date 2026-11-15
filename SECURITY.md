@@ -8,6 +8,7 @@ NuciXNA.Input is a local input management library for MonoGame/XNA. It runs enti
 - Reporting a Vulnerability
 - Scope
 - Disclosure Policy
+- Automated Security Scanning
 - Safe Harbour
 - Recognition
 
@@ -31,6 +32,8 @@ To report a vulnerability:
 
 ## 📌 Scope
 
+The original maintainers are not responsible for changes, modifications, or security issues introduced by downstream forks.
+
 The subsequent report categories are in scope for this repository:
 - Vulnerabilities in NuciXNA.Input library code (InputManager, event system, state management)
 - Vulnerabilities in the NuGet package or build pipeline
@@ -49,6 +52,14 @@ This project follows coordinated disclosure:
 2. A remediation plan is prepared and validated.
 3. Public disclosure is published after a fix, mitigation, or agreed risk decision is available.
 4. Credit is attributed in accordance with reporter preference and project policy.
+
+## 🔍 Automated Security Scanning
+
+This repository runs automated security scans on every push and pull request to `master`, and on a weekly schedule. The scan includes:
+- **Dependency vulnerability scanning** via `dotnet list package --vulnerable --include-transitive`
+- **CodeQL static analysis** for C# code
+
+Results are published to the [Security](https://github.com/hmlendea/nucixna.input/security) tab and the [Actions](https://github.com/hmlendea/nucixna.input/actions/workflows/security.yml) workflow page.
 
 ## 🧾 Safe Harbour
 

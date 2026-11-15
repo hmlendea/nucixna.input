@@ -531,6 +531,8 @@ dotnet test NuciXNA.Input.slnx
 
 **CI Pipeline:** `.github/workflows/dotnet.yml` — Ubuntu latest, .NET 10.0.x, restore → build → test.
 
+**Security Scanning:** `.github/workflows/security.yml` — Ubuntu latest, .NET 10.0.x, dependency vulnerability check and CodeQL analysis for C# on pushes and pull requests to `master`, and on a weekly schedule.
+
 **Material Coverage Gaps:**
 - `InputManager.Update()` end-to-end behavior
 - Frame transition logic (Pressed/Released/HeldDown/Idle)
@@ -622,7 +624,7 @@ No plugin system, no interface-based substitution within library.
 |  ├─ State Type Tests | `NuciXNA.Input.UnitTests/ButtonStateTests.cs`, `NuciXNA.Input.UnitTests/MouseButtonTests.cs` |
 |  ├─ Event Args Tests | `NuciXNA.Input.UnitTests/KeyboardKeyEventArgsTests.cs`, `NuciXNA.Input.UnitTests/MouseButtonEventArgsTests.cs`, `NuciXNA.Input.UnitTests/MouseEventArgsTests.cs`, `NuciXNA.Input.UnitTests/GamepadButtonEventArgsTests.cs` |
 |  ├─ Project Config | `NuciXNA.Input.UnitTests/NuciXNA.Input.UnitTests.csproj` |
-| CI/CD | `.github/workflows/dotnet.yml` |
+| CI/CD | `.github/workflows/dotnet.yml`, `.github/workflows/security.yml`, `.github/workflows/github-release.yml`, `.github/workflows/nuget-release.yml` |
 | Documentation | `docs/` (architecture.md, api-reference.md, usage-guide.md, event-system.md, state-management.md, integration.md, testing.md, known-issues.md, README.md) |
 | Root Docs | `README.md`, `LICENSE`, `PRIVACY.md`, `SECURITY.md` |
 

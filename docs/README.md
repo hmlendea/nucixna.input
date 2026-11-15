@@ -67,7 +67,11 @@ NuciXNA.Input.slnx
 ├── NuciXNA.Input.UnitTests/    # NUnit tests
 │   ├── *Tests.cs
 │   └── NuciXNA.Input.UnitTests.csproj
-└── .github/workflows/dotnet.yml # CI
+└── .github/workflows/          # CI, security, and release pipelines
+    ├── dotnet.yml              # CI
+    ├── security.yml            # Security scanning
+    ├── github-release.yml      # GitHub release
+    └── nuget-release.yml       # NuGet.org release
 ```
 
 ## Key Types
